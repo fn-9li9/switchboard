@@ -1,0 +1,176 @@
+{{define "content"}}
+
+<!-- Header -->
+<div class="mb-6">
+    <div class="flex items-center gap-2 mb-1">
+        <i data-lucide="server" class="w-4 h-4 text-ctp-red"></i>
+        <h2 class="text-ctp-red text-xs font-bold tracking-widest uppercase font-mono">Redis</h2>
+    </div>
+    <p class="text-ctp-subtext0 text-sm">
+        Cache <code class="text-ctp-mauve font-mono">get/set</code> + real-time
+        <code class="text-ctp-mauve font-mono">pub/sub</code> via SSE
+    </p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <!-- ── Cache panel ─────────────────────────────────────────── -->
+    <div class="flex flex-col gap-4">
+        <h3 class="text-ctp-overlay0 text-xs uppercase tracking-widest font-mono flex items-center gap-2">
+            <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i> Cache
+        </h3>
+
+        <!-- SET -->
+        <form hx-post="/redis/set" hx-target="#cache-log" hx-swap="afterbegin" hx-on::after-request="this.reset()" class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-4 flex flex-col gap-3">
+            <span class="text-ctp-green text-xs font-mono font-bold">SET</span>
+            <div class="flex gap-2 flex-wrap">
+                <input name="key" placeholder="key" required class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-green text-ctp-text placeholder-ctp-overlay0 rounded-lg px-3 py-1.5 text-xs outline-none transition-colors font-mono flex-1 min-w-24" />
+                <input name="value" placeholder="value" required class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-green text-ctp-text placeholder-ctp-overlay0 rounded-lg px-3 py-1.5 text-xs outline-none transition-colors font-mono flex-1 min-w-24" />
+                <input name="ttl" placeholder="ttl (s)" class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-green text-ctp-text placeholder-ctp-overlay0 rounded-lg px-3 py-1.5 text-xs outline-none transition-colors font-mono w-24" />
+            </div>
+            <button type="submit" class="flex items-center gap-1.5 self-start bg-ctp-surface0 border border-ctp-green text-ctp-green hover:bg-ctp-green hover:text-ctp-base rounded-lg px-3 py-1.5 text-xs transition-colors font-mono">
+                <i data-lucide="save" class="w-3 h-3"></i> set
+            </button>
+        </form>
+
+        <!-- GET -->
+        <form hx-get="/redis/get" hx-target="#cache-log" hx-swap="afterbegin" hx-on::after-request="this.reset()" class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-4 flex flex-col gap-3">
+            <span class="text-ctp-sapphire text-xs font-mono font-bold">GET</span>
+            <div class="flex gap-2">
+                <input name="key" placeholder="key" required class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-sapphire text-ctp-text placeholder-ctp-overlay0 rounded-lg px-3 py-1.5 text-xs outline-none transition-colors font-mono flex-1" />
+                <button type="submit" class="flex items-center gap-1.5 bg-ctp-surface0 border border-ctp-sapphire text-ctp-sapphire hover:bg-ctp-sapphire hover:text-ctp-base rounded-lg px-3 py-1.5 text-xs transition-colors font-mono">
+                    <i data-lucide="search" class="w-3 h-3"></i> get
+                </button>
+            </div>
+        </form>
+
+        <!-- DEL -->
+        <form hx-delete="/redis/del" hx-target="#cache-log" hx-swap="afterbegin" hx-on::after-request="this.reset()" class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-4 flex flex-col gap-3">
+            <span class="text-ctp-red text-xs font-mono font-bold">DEL</span>
+            <div class="flex gap-2">
+                <input name="key" placeholder="key" required class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-red text-ctp-text placeholder-ctp-overlay0 rounded-lg px-3 py-1.5 text-xs outline-none transition-colors font-mono flex-1" />
+                <button type="submit" class="flex items-center gap-1.5 bg-ctp-surface0 border border-ctp-red text-ctp-red hover:bg-ctp-red hover:text-ctp-base rounded-lg px-3 py-1.5 text-xs transition-colors font-mono">
+                    <i data-lucide="trash-2" class="w-3 h-3"></i> del
+                </button>
+            </div>
+        </form>
+
+        <!-- Cache log -->
+        <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-4">
+            <div class="text-ctp-overlay0 text-xs font-mono uppercase tracking-widest mb-3 flex items-center gap-2">
+                <i data-lucide="terminal" class="w-3.5 h-3.5"></i> log
+            </div>
+            <div id="cache-log" class="flex flex-col gap-2 min-h-16">
+                <span class="text-ctp-overlay0 text-xs font-mono italic">waiting for operations...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Pub/Sub panel ───────────────────────────────────────── -->
+    <div class="flex flex-col gap-4">
+        <h3 class="text-ctp-overlay0 text-xs uppercase tracking-widest font-mono flex items-center gap-2">
+            <i data-lucide="antenna" class="w-3.5 h-3.5"></i> Pub / Sub
+        </h3>
+
+        <!-- Publish -->
+        <form hx-post="/redis/publish" hx-target="#pubsub-sent" hx-swap="afterbegin" hx-on::after-request="this.reset()" class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-4 flex flex-col gap-3">
+            <span class="text-ctp-pink text-xs font-mono font-bold">PUBLISH</span>
+            <div class="flex gap-2 flex-wrap">
+                <input name="channel" placeholder="channel" value="switchboard" required class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-pink text-ctp-text placeholder-ctp-overlay0 rounded-lg px-3 py-1.5 text-xs outline-none transition-colors font-mono w-36" />
+                <input name="message" placeholder="message" required class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-pink text-ctp-text placeholder-ctp-overlay0 rounded-lg px-3 py-1.5 text-xs outline-none transition-colors font-mono flex-1" />
+            </div>
+            <button type="submit" class="flex items-center gap-1.5 self-start bg-ctp-surface0 border border-ctp-pink text-ctp-pink hover:bg-ctp-pink hover:text-ctp-base rounded-lg px-3 py-1.5 text-xs transition-colors font-mono">
+                <i data-lucide="send" class="w-3 h-3"></i> publish
+            </button>
+        </form>
+
+        <!-- Sent log -->
+        <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-4">
+            <div class="text-ctp-overlay0 text-xs font-mono uppercase tracking-widest mb-3 flex items-center gap-2">
+                <i data-lucide="send" class="w-3.5 h-3.5"></i> published
+            </div>
+            <div id="pubsub-sent" class="flex flex-col gap-2 min-h-10">
+                <span class="text-ctp-overlay0 text-xs font-mono italic">no messages yet...</span>
+            </div>
+        </div>
+
+        <!-- Subscribe SSE -->
+        <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-4 flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+                <span class="text-ctp-teal text-xs font-mono font-bold flex items-center gap-2">
+                    <i data-lucide="activity" class="w-3.5 h-3.5"></i> SUBSCRIBE
+                </span>
+                <div class="flex items-center gap-2">
+                    <input id="sub-channel" placeholder="channel" value="switchboard" class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-teal text-ctp-text placeholder-ctp-overlay0 rounded-lg px-3 py-1 text-xs outline-none transition-colors font-mono w-32" />
+                    <button id="sub-btn" onclick="startSubscribe()" class="flex items-center gap-1.5 bg-ctp-surface0 border border-ctp-teal text-ctp-teal hover:bg-ctp-teal hover:text-ctp-base rounded-lg px-3 py-1 text-xs transition-colors font-mono">
+                        <i data-lucide="play" class="w-3 h-3"></i> subscribe
+                    </button>
+                </div>
+            </div>
+
+            <div id="sse-status" class="text-ctp-overlay0 text-xs font-mono italic">not connected</div>
+
+            <div id="pubsub-stream" class="flex flex-col gap-2 min-h-24 max-h-64 overflow-y-auto">
+                <span class="text-ctp-overlay0 text-xs font-mono italic">waiting for messages...</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- CSS helper para las filas -->
+<style type="text/tailwindcss">
+    .result-row  { @apply flex items-center gap-3 py-1 border-b border-ctp-surface0; }
+    .pubsub-row  { @apply flex items-center gap-3 py-1 border-b border-ctp-surface0; }
+</style>
+
+<script>
+    let evtSource = null;
+
+    function startSubscribe () {
+        if ( evtSource ) {
+            evtSource.close();
+        }
+
+        const channel = document.getElementById( "sub-channel" ).value || "switchboard";
+        const status = document.getElementById( "sse-status" );
+        const stream = document.getElementById( "pubsub-stream" );
+        const btn = document.getElementById( "sub-btn" );
+
+        status.textContent = "connecting...";
+        status.className = "text-ctp-yellow text-xs font-mono";
+
+        evtSource = new EventSource( `/redis/subscribe?channel=${ encodeURIComponent( channel ) }` );
+
+        evtSource.addEventListener( "connected", () => {
+            status.textContent = `● subscribed to ${ channel }`;
+            status.className = "text-ctp-green text-xs font-mono";
+            btn.innerHTML = `<i data-lucide="stop-circle" class="w-3 h-3"></i> unsubscribe`;
+            btn.onclick = stopSubscribe;
+            lucide.createIcons();
+        } );
+
+        evtSource.addEventListener( "message", ( e ) => {
+            stream.innerHTML = e.data + stream.innerHTML;
+            lucide.createIcons();
+        } );
+
+        evtSource.onerror = () => {
+            status.textContent = "disconnected";
+            status.className = "text-ctp-red text-xs font-mono italic";
+        };
+    }
+
+    function stopSubscribe () {
+        if ( evtSource ) evtSource.close();
+        const status = document.getElementById( "sse-status" );
+        const btn = document.getElementById( "sub-btn" );
+        status.textContent = "not connected";
+        status.className = "text-ctp-overlay0 text-xs font-mono italic";
+        btn.innerHTML = `<i data-lucide="play" class="w-3 h-3"></i> subscribe`;
+        btn.onclick = startSubscribe;
+        lucide.createIcons();
+    }
+</script>
+
+{{end}}
