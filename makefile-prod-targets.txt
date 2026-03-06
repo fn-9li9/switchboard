@@ -1,0 +1,16 @@
+# ─── Producción (agregar al Makefile existente) ───────────────
+
+prod-build: ## Build todas las imágenes Docker
+	docker compose -f compose.prod.yml build
+
+prod-up: ## Levanta todo en producción
+	docker compose -f compose.prod.yml up -d --wait
+
+prod-down: ## Para producción
+	docker compose -f compose.prod.yml down
+
+prod-logs: ## Logs de los servicios Go en producción
+	docker compose -f compose.prod.yml logs -f gateway notifier processor
+
+prod-clean: ## Para y elimina volúmenes de producción
+	docker compose -f compose.prod.yml down -v
