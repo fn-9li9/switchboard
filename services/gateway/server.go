@@ -11,6 +11,7 @@ import (
 	wstransport "switchboard/internal/transport/ws"
 	"switchboard/services/gateway/handlers"
 
+	"github.com/IBM/sarama"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/nats-io/nats.go"
 	"github.com/redis/go-redis/v9"
@@ -18,17 +19,18 @@ import (
 )
 
 type Server struct {
-	cfg  *config.Config
-	log  zerolog.Logger
-	http *http.Server
-	pool *pgxpool.Pool
-	rdb  *redis.Client
-	nc   *nats.Conn
-	hub  *wstransport.Hub
+	cfg      *config.Config
+	log      zerolog.Logger
+	http     *http.Server
+	pool     *pgxpool.Pool
+	rdb      *redis.Client
+	nc       *nats.Conn
+	hub      *wstransport.Hub
+	producer sarama.SyncProducer
 }
 
-func NewServer(cfg *config.Config, log zerolog.Logger, pool *pgxpool.Pool, rdb *redis.Client, nc *nats.Conn) *Server {
-	s := &Server{cfg: cfg, log: log, pool: pool, rdb: rdb, nc: nc}
+func NewServer(cfg *config.Config, log zerolog.Logger, pool *pgxpool.Pool, rdb *redis.Client, nc *nats.Conn, producer sarama.SyncProducer) *Server {
+	s := &Server{cfg: cfg, log: log, pool: pool, rdb: rdb, nc: nc, producer: producer}
 
 	s.hub = wstransport.NewHub()
 	go s.hub.Run()
@@ -55,16 +57,18 @@ func mustPage(partial string) *template.Template {
 }
 
 func (s *Server) registerRoutes(mux *http.ServeMux) {
-	evh  := handlers.NewEventsHandler(s.pool, s.log)
-	rdh  := handlers.NewRedisHandler(s.rdb, s.log)
-	nath := handlers.NewNATSHandler(s.nc, s.log)
-	wsh  := handlers.NewWSHandler(s.hub, s.log)
+	evh   := handlers.NewEventsHandler(s.pool, s.log)
+	rdh   := handlers.NewRedisHandler(s.rdb, s.log)
+	nath  := handlers.NewNATSHandler(s.nc, s.log)
+	wsh   := handlers.NewWSHandler(s.hub, s.log)
+	kafkah := handlers.NewKafkaHandler(s.producer, s.nc, s.log)
 
 	indexTmpl    := mustPage("services/gateway/templates/index.html")
 	postgresTmpl := mustPage("services/gateway/templates/partials/events.html")
 	redisTmpl    := mustPage("services/gateway/templates/partials/redis.html")
 	natsTmpl     := mustPage("services/gateway/templates/partials/nats.html")
 	wsTmpl       := mustPage("services/gateway/templates/partials/ws.html")
+	kafkaTmpl    := mustPage("services/gateway/templates/partials/kafka.html")
 
 	// Pages
 	mux.HandleFunc("GET /{$}",      s.renderPage(indexTmpl))
@@ -72,6 +76,7 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /redis",    s.renderPage(redisTmpl))
 	mux.HandleFunc("GET /nats",     s.renderPage(natsTmpl))
 	mux.HandleFunc("GET /ws",       s.renderPage(wsTmpl))
+	mux.HandleFunc("GET /kafka",    s.renderPage(kafkaTmpl))
 
 	// Health
 	mux.HandleFunc("GET /health", s.handleHealth)
@@ -95,6 +100,10 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	// WebSocket
 	mux.HandleFunc("GET /ws/connect",         wsh.Connect)
 	mux.HandleFunc("GET /ws/count",           wsh.Count)
+
+	// Kafka
+	mux.HandleFunc("POST /kafka/produce",     kafkah.Produce)
+	mux.HandleFunc("GET /kafka/results",      kafkah.Results) // SSE — resultados del processor
 }
 
 func (s *Server) renderPage(tmpl *template.Template) http.HandlerFunc {
