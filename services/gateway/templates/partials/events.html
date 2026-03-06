@@ -2,34 +2,46 @@
 
 <!-- Header -->
 <div class="mb-6">
-    <h2 class="text-ctp-green text-xs font-bold tracking-widest uppercase mb-1">Postgres</h2>
-    <p class="text-ctp-subtext0 text-sm">CRUD directo con <code class="text-ctp-mauve">pgx/v5</code> — sin ORM</p>
+    <div class="flex items-center gap-2 mb-1">
+        <i data-lucide="database" class="w-4 h-4 text-ctp-green"></i>
+        <h2 class="text-ctp-green text-xs font-bold tracking-widest uppercase font-mono">Postgres</h2>
+    </div>
+    <p class="text-ctp-subtext0 text-sm">
+        Direct CRUD with <code class="text-ctp-mauve font-mono">pgx/v5</code> — no ORM
+    </p>
 </div>
 
-<!-- Form -->
-<form hx-post="/events" hx-target="#events-body" hx-swap="afterbegin" hx-on::after-request="this.reset()" class="flex flex-wrap gap-2 mb-6">
-    <input name="source" placeholder="source" required class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-green text-ctp-text placeholder-ctp-overlay0 rounded px-3 py-1.5 text-sm outline-none transition-colors" />
-    <input name="topic" placeholder="topic" required class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-green text-ctp-text placeholder-ctp-overlay0 rounded px-3 py-1.5 text-sm outline-none transition-colors" />
-    <input name="payload" placeholder='{"key":"value"}' class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-green text-ctp-text placeholder-ctp-overlay0 rounded px-3 py-1.5 text-sm outline-none transition-colors w-64" />
-    <button type="submit" class="bg-ctp-surface0 border border-ctp-green text-ctp-green hover:bg-ctp-green hover:text-ctp-base rounded px-4 py-1.5 text-sm transition-colors">
-        + insertar
+<!-- Insert form -->
+<form hx-post="/events" hx-target="#events-body" hx-swap="afterbegin" hx-on::after-request="this.reset()" class="flex flex-wrap gap-2 mb-6 items-center">
+    <input name="source" placeholder="source" required class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-green text-ctp-text placeholder-ctp-overlay0 rounded-lg px-3 py-1.5 text-sm outline-none transition-colors font-mono" />
+    <input name="topic" placeholder="topic" required class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-green text-ctp-text placeholder-ctp-overlay0 rounded-lg px-3 py-1.5 text-sm outline-none transition-colors font-mono" />
+    <input name="payload" placeholder='{"key":"value"}' class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-green text-ctp-text placeholder-ctp-overlay0 rounded-lg px-3 py-1.5 text-sm outline-none transition-colors font-mono w-56" />
+    <button type="submit" class="flex items-center gap-1.5 bg-ctp-surface0 border border-ctp-green text-ctp-green hover:bg-ctp-green hover:text-ctp-base rounded-lg px-4 py-1.5 text-sm transition-colors font-sans font-medium">
+        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+        Insert
     </button>
 </form>
 
-<!-- Tabla -->
-<div class="bg-ctp-mantle border border-ctp-surface1 rounded-lg overflow-hidden">
+<!-- Table -->
+<div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl overflow-hidden">
     <table class="w-full text-sm">
         <thead>
             <tr class="border-b border-ctp-surface1">
-                <th class="text-left px-4 py-2 text-ctp-overlay1 text-xs uppercase tracking-wider font-medium w-16">ID</th>
-                <th class="text-left px-4 py-2 text-ctp-overlay1 text-xs uppercase tracking-wider font-medium">Source</th>
-                <th class="text-left px-4 py-2 text-ctp-overlay1 text-xs uppercase tracking-wider font-medium">Topic</th>
-                <th class="text-left px-4 py-2 text-ctp-overlay1 text-xs uppercase tracking-wider font-medium">Payload</th>
-                <th class="text-left px-4 py-2 text-ctp-overlay1 text-xs uppercase tracking-wider font-medium">Created At</th>
+                <th class="text-left px-4 py-2.5 text-ctp-overlay0 text-xs uppercase tracking-wider font-medium font-mono w-16">ID</th>
+                <th class="text-left px-4 py-2.5 text-ctp-overlay0 text-xs uppercase tracking-wider font-medium font-mono">Source</th>
+                <th class="text-left px-4 py-2.5 text-ctp-overlay0 text-xs uppercase tracking-wider font-medium font-mono">Topic</th>
+                <th class="text-left px-4 py-2.5 text-ctp-overlay0 text-xs uppercase tracking-wider font-medium font-mono">Payload</th>
+                <th class="text-left px-4 py-2.5 text-ctp-overlay0 text-xs uppercase tracking-wider font-medium font-mono">Time</th>
                 <th class="w-10"></th>
             </tr>
         </thead>
         <tbody id="events-body" hx-get="/events" hx-trigger="load" hx-swap="innerHTML">
+            <tr>
+                <td colspan="6" class="px-4 py-6 text-center text-ctp-overlay0 text-xs font-mono">
+                    <i data-lucide="loader" class="w-4 h-4 inline animate-spin mr-2"></i>
+                    loading...
+                </td>
+            </tr>
         </tbody>
     </table>
 </div>

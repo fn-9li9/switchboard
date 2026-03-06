@@ -1,65 +1,76 @@
 {{define "content"}}
-<div class="flex flex-col items-center justify-center min-h-[70vh] gap-8 text-center">
+<div class="flex flex-col items-center justify-center min-h-[70vh] gap-10 text-center">
 
-    <!-- Logo / título -->
-    <div>
-        <div class="text-6xl mb-4">⚡</div>
-        <h1 class="text-4xl font-bold text-ctp-mauve tracking-widest mb-2">switchboard</h1>
-        <p class="text-ctp-subtext0 text-sm tracking-widest uppercase">Go Polyglot Playground</p>
+    <!-- Hero -->
+    <div class="flex flex-col items-center gap-3">
+        <div class="p-3 bg-ctp-surface0 rounded-2xl border border-ctp-surface1">
+            <i data-lucide="zap" class="w-10 h-10 text-ctp-mauve"></i>
+        </div>
+        <h1 class="font-display font-bold text-4xl text-ctp-mauve tracking-widest">switchboard</h1>
+        <p class="text-ctp-overlay1 text-xs tracking-[0.3em] uppercase font-mono">Go Polyglot Playground</p>
     </div>
 
-    <!-- Descripción -->
-    <p class="text-ctp-subtext1 max-w-xl leading-relaxed">
-        Un cuadro de conexiones que enruta señales entre sistemas.<br>
-        3 microservicios, 6 flujos, tiempo real.
+    <!-- Description -->
+    <p class="text-ctp-subtext1 max-w-lg leading-relaxed text-sm">
+        A connection board that routes signals between systems.<br>
+        3 microservices · 6 flows · real-time.
     </p>
 
-    <!-- Flujos -->
+    <!-- Flow cards -->
     <div class="grid grid-cols-2 md:grid-cols-3 gap-3 w-full max-w-2xl">
 
-        <a href="/postgres" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-green rounded-lg p-4 transition-all text-left">
-            <div class="text-ctp-green text-xl mb-1">🗄</div>
-            <div class="text-ctp-text text-sm font-bold">Postgres</div>
-            <div class="text-ctp-subtext0 text-xs mt-1">CRUD · infinite scroll · hx-swap</div>
+        <a href="/postgres" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-green rounded-xl p-4 transition-all text-left">
+            <i data-lucide="database" class="w-5 h-5 text-ctp-green mb-2"></i>
+            <div class="text-ctp-text text-sm font-semibold font-display">Postgres</div>
+            <div class="text-ctp-subtext0 text-xs mt-1 font-mono">CRUD · infinite scroll · hx-swap</div>
         </a>
 
-        <a href="/redis" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-red rounded-lg p-4 transition-all text-left">
-            <div class="text-ctp-red text-xl mb-1">⚡</div>
-            <div class="text-ctp-text text-sm font-bold">Redis</div>
-            <div class="text-ctp-subtext0 text-xs mt-1">get/set · pub/sub · SSE</div>
+        <a href="/redis" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-red rounded-xl p-4 transition-all text-left">
+            <i data-lucide="server" class="w-5 h-5 text-ctp-red mb-2"></i>
+            <div class="text-ctp-text text-sm font-semibold font-display">Redis</div>
+            <div class="text-ctp-subtext0 text-xs mt-1 font-mono">get/set · pub/sub · SSE</div>
         </a>
 
-        <a href="/nats" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-sapphire rounded-lg p-4 transition-all text-left">
-            <div class="text-ctp-sapphire text-xl mb-1">📡</div>
-            <div class="text-ctp-text text-sm font-bold">NATS</div>
-            <div class="text-ctp-subtext0 text-xs mt-1">request/reply · latencia sub-ms</div>
+        <a href="/nats" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-sapphire rounded-xl p-4 transition-all text-left">
+            <i data-lucide="radio" class="w-5 h-5 text-ctp-sapphire mb-2"></i>
+            <div class="text-ctp-text text-sm font-semibold font-display">NATS</div>
+            <div class="text-ctp-subtext0 text-xs mt-1 font-mono">request/reply · sub-ms latency</div>
         </a>
 
-        <a href="/ws" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-yellow rounded-lg p-4 transition-all text-left">
-            <div class="text-ctp-yellow text-xl mb-1">🔌</div>
-            <div class="text-ctp-text text-sm font-bold">WebSocket</div>
-            <div class="text-ctp-subtext0 text-xs mt-1">chat · hub pattern · gorilla/ws</div>
+        <a href="/ws" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-yellow rounded-xl p-4 transition-all text-left">
+            <i data-lucide="plug" class="w-5 h-5 text-ctp-yellow mb-2"></i>
+            <div class="text-ctp-text text-sm font-semibold font-display">WebSocket</div>
+            <div class="text-ctp-subtext0 text-xs mt-1 font-mono">chat · hub pattern · gorilla/ws</div>
         </a>
 
-        <a href="/kafka" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-peach rounded-lg p-4 transition-all text-left">
-            <div class="text-ctp-peach text-xl mb-1">📨</div>
-            <div class="text-ctp-text text-sm font-bold">Kafka</div>
-            <div class="text-ctp-subtext0 text-xs mt-1">produce · consume · sarama</div>
+        <a href="/kafka" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-peach rounded-xl p-4 transition-all text-left">
+            <i data-lucide="mail" class="w-5 h-5 text-ctp-peach mb-2"></i>
+            <div class="text-ctp-text text-sm font-semibold font-display">Kafka</div>
+            <div class="text-ctp-subtext0 text-xs mt-1 font-mono">produce · consume · sarama</div>
         </a>
 
-        <a href="/firehose" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-pink rounded-lg p-4 transition-all text-left">
-            <div class="text-ctp-pink text-xl mb-1">🔥</div>
-            <div class="text-ctp-text text-sm font-bold">Firehose</div>
-            <div class="text-ctp-subtext0 text-xs mt-1">todos los eventos · tiempo real</div>
+        <a href="/firehose" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-pink rounded-xl p-4 transition-all text-left">
+            <i data-lucide="flame" class="w-5 h-5 text-ctp-pink mb-2"></i>
+            <div class="text-ctp-text text-sm font-semibold font-display">Firehose</div>
+            <div class="text-ctp-subtext0 text-xs mt-1 font-mono">all events · real-time</div>
         </a>
 
     </div>
 
-    <!-- Servicios -->
-    <div class="flex gap-6 text-xs text-ctp-overlay1">
-        <span>gateway <span class="text-ctp-surface2">:8080</span></span>
-        <span>notifier <span class="text-ctp-surface2">:8081</span></span>
-        <span>processor <span class="text-ctp-surface2">:8082</span></span>
+    <!-- Services -->
+    <div class="flex gap-6 text-xs text-ctp-overlay0 font-mono">
+        <span class="flex items-center gap-1">
+            <i data-lucide="circle-dot" class="w-3 h-3 text-ctp-green"></i>
+            gateway <span class="text-ctp-surface2 ml-1">:8080</span>
+        </span>
+        <span class="flex items-center gap-1">
+            <i data-lucide="circle-dot" class="w-3 h-3 text-ctp-surface2"></i>
+            notifier <span class="text-ctp-surface2 ml-1">:8081</span>
+        </span>
+        <span class="flex items-center gap-1">
+            <i data-lucide="circle-dot" class="w-3 h-3 text-ctp-surface2"></i>
+            processor <span class="text-ctp-surface2 ml-1">:8082</span>
+        </span>
     </div>
 
 </div>
