@@ -11,3 +11,9 @@ redis:
 
 nats:
   url: nats://localhost:4222
+
+postgres:
+  dsn: postgres://switchboard:switchboard@localhost:5432/switchboard?sslmode=disable
+  max_conns: 10
+  min_conns: 2
+  max_idle_secs: 300
