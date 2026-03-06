@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"switchboard/internal/config"
+	wstransport "switchboard/internal/transport/ws"
 	"switchboard/services/gateway/handlers"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -23,10 +24,14 @@ type Server struct {
 	pool *pgxpool.Pool
 	rdb  *redis.Client
 	nc   *nats.Conn
+	hub  *wstransport.Hub
 }
 
 func NewServer(cfg *config.Config, log zerolog.Logger, pool *pgxpool.Pool, rdb *redis.Client, nc *nats.Conn) *Server {
 	s := &Server{cfg: cfg, log: log, pool: pool, rdb: rdb, nc: nc}
+
+	s.hub = wstransport.NewHub()
+	go s.hub.Run()
 
 	mux := http.NewServeMux()
 	s.registerRoutes(mux)
@@ -50,39 +55,46 @@ func mustPage(partial string) *template.Template {
 }
 
 func (s *Server) registerRoutes(mux *http.ServeMux) {
-	evh := handlers.NewEventsHandler(s.pool, s.log)
-	rdh := handlers.NewRedisHandler(s.rdb, s.log)
+	evh  := handlers.NewEventsHandler(s.pool, s.log)
+	rdh  := handlers.NewRedisHandler(s.rdb, s.log)
 	nath := handlers.NewNATSHandler(s.nc, s.log)
+	wsh  := handlers.NewWSHandler(s.hub, s.log)
 
-	indexTmpl := mustPage("services/gateway/templates/index.html")
+	indexTmpl    := mustPage("services/gateway/templates/index.html")
 	postgresTmpl := mustPage("services/gateway/templates/partials/events.html")
-	redisTmpl := mustPage("services/gateway/templates/partials/redis.html")
-	natsTmpl := mustPage("services/gateway/templates/partials/nats.html")
+	redisTmpl    := mustPage("services/gateway/templates/partials/redis.html")
+	natsTmpl     := mustPage("services/gateway/templates/partials/nats.html")
+	wsTmpl       := mustPage("services/gateway/templates/partials/ws.html")
 
 	// Pages
-	mux.HandleFunc("GET /{$}", s.renderPage(indexTmpl))
+	mux.HandleFunc("GET /{$}",      s.renderPage(indexTmpl))
 	mux.HandleFunc("GET /postgres", s.renderPage(postgresTmpl))
-	mux.HandleFunc("GET /redis", s.renderPage(redisTmpl))
-	mux.HandleFunc("GET /nats", s.renderPage(natsTmpl))
+	mux.HandleFunc("GET /redis",    s.renderPage(redisTmpl))
+	mux.HandleFunc("GET /nats",     s.renderPage(natsTmpl))
+	mux.HandleFunc("GET /ws",       s.renderPage(wsTmpl))
 
 	// Health
 	mux.HandleFunc("GET /health", s.handleHealth)
 
 	// Postgres
-	mux.HandleFunc("GET /events", evh.List)
-	mux.HandleFunc("POST /events", evh.Create)
-	mux.HandleFunc("DELETE /events/{id}", evh.Delete)
+	mux.HandleFunc("GET /events",             evh.List)
+	mux.HandleFunc("POST /events",            evh.Create)
+	mux.HandleFunc("DELETE /events/{id}",     evh.Delete)
 
 	// Redis
-	mux.HandleFunc("POST /redis/set", rdh.Set)
-	mux.HandleFunc("GET /redis/get", rdh.Get)
-	mux.HandleFunc("DELETE /redis/del", rdh.Del)
-	mux.HandleFunc("POST /redis/publish", rdh.Publish)
-	mux.HandleFunc("GET /redis/subscribe", rdh.Subscribe)
+	mux.HandleFunc("POST /redis/set",         rdh.Set)
+	mux.HandleFunc("GET /redis/get",          rdh.Get)
+	mux.HandleFunc("DELETE /redis/del",       rdh.Del)
+	mux.HandleFunc("POST /redis/publish",     rdh.Publish)
+	mux.HandleFunc("GET /redis/subscribe",    rdh.Subscribe)
 
 	// NATS
-	mux.HandleFunc("POST /nats/request", nath.Request)
-	mux.HandleFunc("GET /nats/subscribe", nath.Subscribe) // SSE
+	mux.HandleFunc("POST /nats/request",      nath.Request)
+	mux.HandleFunc("GET /nats/subscribe",     nath.Subscribe)
+
+	// WebSocket
+	mux.HandleFunc("GET /ws/connect",         wsh.Connect)
+	mux.HandleFunc("GET /ws/count",           wsh.Count)
 }
 
 func (s *Server) renderPage(tmpl *template.Template) http.HandlerFunc {

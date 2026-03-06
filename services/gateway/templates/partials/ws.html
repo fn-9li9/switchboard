@@ -1,0 +1,164 @@
+{{define "content"}}
+
+<!-- Header -->
+<div class="mb-6">
+    <div class="flex items-center gap-2 mb-1">
+        <i data-lucide="plug" class="w-4 h-4 text-ctp-yellow"></i>
+        <h2 class="text-ctp-yellow text-xs font-bold tracking-widest uppercase font-mono">WebSocket</h2>
+    </div>
+    <p class="text-ctp-subtext0 text-sm">
+        Live chat with <code class="text-ctp-mauve font-mono">hub pattern</code> —
+        gorilla/websocket + HTMX <code class="text-ctp-mauve font-mono">ws-connect</code>
+    </p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <!-- ── Connect panel ──────────────────────────────────────── -->
+    <div class="flex flex-col gap-4">
+        <h3 class="text-ctp-overlay0 text-xs uppercase tracking-widest font-mono flex items-center gap-2">
+            <i data-lucide="user" class="w-3.5 h-3.5"></i> Connect
+        </h3>
+
+        <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-4 flex flex-col gap-3">
+            <input id="ws-username" placeholder="your username" class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-yellow text-ctp-text placeholder-ctp-overlay0 rounded-lg px-3 py-1.5 text-xs outline-none transition-colors font-mono" />
+            <button id="ws-connect-btn" onclick="wsConnect()" class="flex items-center justify-center gap-1.5 bg-ctp-surface0 border border-ctp-yellow text-ctp-yellow hover:bg-ctp-yellow hover:text-ctp-base rounded-lg px-3 py-1.5 text-xs transition-colors font-mono">
+                <i data-lucide="plug" class="w-3 h-3"></i> connect
+            </button>
+            <div id="ws-status" class="text-ctp-overlay0 text-xs font-mono italic text-center">disconnected</div>
+        </div>
+
+        <!-- Online count — HTMX polling cada 3s -->
+        <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-4 flex items-center gap-3">
+            <i data-lucide="users" class="w-4 h-4 text-ctp-green shrink-0"></i>
+            <div id="ws-count" hx-get="/ws/count" hx-trigger="every 3s" class="text-ctp-green font-mono text-xs">
+                0 online
+            </div>
+        </div>
+
+        <!-- Info -->
+        <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-4 flex flex-col gap-2">
+            <span class="text-ctp-overlay0 text-xs uppercase tracking-widest font-mono flex items-center gap-2">
+                <i data-lucide="info" class="w-3.5 h-3.5"></i> how it works
+            </span>
+            <div class="flex flex-col gap-1.5 mt-1">
+                <div class="flex items-start gap-2 text-xs font-mono text-ctp-subtext0">
+                    <span class="text-ctp-mauve shrink-0">1.</span> browser upgrades to WebSocket
+                </div>
+                <div class="flex items-start gap-2 text-xs font-mono text-ctp-subtext0">
+                    <span class="text-ctp-mauve shrink-0">2.</span> hub registers the client
+                </div>
+                <div class="flex items-start gap-2 text-xs font-mono text-ctp-subtext0">
+                    <span class="text-ctp-mauve shrink-0">3.</span> messages broadcast to all
+                </div>
+                <div class="flex items-start gap-2 text-xs font-mono text-ctp-subtext0">
+                    <span class="text-ctp-mauve shrink-0">4.</span> open multiple tabs to test
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Chat panel ─────────────────────────────────────────── -->
+    <div class="md:col-span-2 flex flex-col gap-4">
+        <h3 class="text-ctp-overlay0 text-xs uppercase tracking-widest font-mono flex items-center gap-2">
+            <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Chat
+        </h3>
+
+        <!-- Messages -->
+        <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-4 flex flex-col gap-1 min-h-80 max-h-[480px] overflow-y-auto" id="chat-messages">
+            <div class="chat-msg system">
+                <span class="text-ctp-overlay0 font-mono text-xs">--:--:--</span>
+                <span class="text-ctp-overlay1 text-xs italic">connect to start chatting</span>
+            </div>
+        </div>
+
+        <!-- Input -->
+        <div class="flex gap-2">
+            <input id="chat-input" placeholder="type a message..." disabled onkeydown="if(event.key==='Enter') wsSend()"
+                class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-yellow text-ctp-text placeholder-ctp-overlay0 rounded-lg px-3 py-2 text-sm outline-none transition-colors font-mono flex-1 disabled:opacity-40" />
+            <button onclick="wsSend()" disabled id="chat-send-btn" class="flex items-center gap-1.5 bg-ctp-surface0 border border-ctp-yellow text-ctp-yellow hover:bg-ctp-yellow hover:text-ctp-base rounded-lg px-4 py-2 text-xs transition-colors font-mono disabled:opacity-40">
+                <i data-lucide="send" class="w-3 h-3"></i> send
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<style type="text/tailwindcss">
+    .chat-msg        { @apply flex items-baseline gap-3 py-1 border-b border-ctp-surface0; }
+    .chat-msg.system { @apply opacity-60; }
+</style>
+
+<script>
+    let ws = null;
+
+    function wsConnect () {
+        const username = document.getElementById( "ws-username" ).value.trim() ||
+            "user-" + Math.floor( Math.random() * 1000 );
+        const status = document.getElementById( "ws-status" );
+        const btn = document.getElementById( "ws-connect-btn" );
+        const input = document.getElementById( "chat-input" );
+        const sendBtn = document.getElementById( "chat-send-btn" );
+
+        if ( ws ) {
+            ws.close();
+            return;
+        }
+
+        const proto = location.protocol === "https:" ? "wss:" : "ws:";
+        ws = new WebSocket( `${ proto }//${ location.host }/ws/connect?username=${ encodeURIComponent( username ) }` );
+
+        ws.onopen = () => {
+            status.textContent = `● connected as ${ username }`;
+            status.className = "text-ctp-green text-xs font-mono";
+            btn.innerHTML = `<i data-lucide="plug-2" class="w-3 h-3"></i> disconnect`;
+            btn.onclick = wsDisconnect;
+            input.disabled = false;
+            sendBtn.disabled = false;
+            input.focus();
+            lucide.createIcons();
+        };
+
+        ws.onmessage = ( e ) => {
+            const messages = document.getElementById( "chat-messages" );
+            messages.innerHTML += e.data;
+            messages.scrollTop = messages.scrollHeight;
+            lucide.createIcons();
+        };
+
+        ws.onclose = () => {
+            wsDisconnect();
+        };
+
+        ws.onerror = () => {
+            status.textContent = "connection error";
+            status.className = "text-ctp-red text-xs font-mono italic";
+        };
+    }
+
+    function wsDisconnect () {
+        if ( ws ) { ws.close(); ws = null; }
+        const status = document.getElementById( "ws-status" );
+        const btn = document.getElementById( "ws-connect-btn" );
+        const input = document.getElementById( "chat-input" );
+        const sendBtn = document.getElementById( "chat-send-btn" );
+
+        status.textContent = "disconnected";
+        status.className = "text-ctp-overlay0 text-xs font-mono italic";
+        btn.innerHTML = `<i data-lucide="plug" class="w-3 h-3"></i> connect`;
+        btn.onclick = wsConnect;
+        input.disabled = true;
+        sendBtn.disabled = true;
+        lucide.createIcons();
+    }
+
+    function wsSend () {
+        const input = document.getElementById( "chat-input" );
+        const text = input.value.trim();
+        if ( !text || !ws || ws.readyState !== WebSocket.OPEN ) return;
+        ws.send( text );
+        input.value = "";
+    }
+</script>
+
+{{end}}
