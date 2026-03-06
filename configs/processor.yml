@@ -1,0 +1,24 @@
+env: dev
+service: processor
+
+server:
+  host: 0.0.0.0
+  port: 8082
+
+postgres:
+  dsn: postgres://switchboard:switchboard@localhost:5432/switchboard?sslmode=disable
+  max_conns: 10
+  min_conns: 2
+  max_idle_secs: 300
+
+redis:
+  addr: localhost:6379
+  db: 0
+
+nats:
+  url: nats://localhost:4222
+
+kafka:
+  brokers:
+    - localhost:9092
+  group_id: switchboard-processor
