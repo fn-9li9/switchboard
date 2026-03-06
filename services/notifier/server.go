@@ -2,12 +2,14 @@ package notifier
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
 
 	"switchboard/internal/config"
 
+	"github.com/nats-io/nats.go"
 	"github.com/rs/zerolog"
 )
 
@@ -15,10 +17,11 @@ type Server struct {
 	cfg  *config.Config
 	log  zerolog.Logger
 	http *http.Server
+	nc   *nats.Conn
 }
 
-func NewServer(cfg *config.Config, log zerolog.Logger) *Server {
-	s := &Server{cfg: cfg, log: log}
+func NewServer(cfg *config.Config, log zerolog.Logger, nc *nats.Conn) *Server {
+	s := &Server{cfg: cfg, log: log, nc: nc}
 
 	mux := http.NewServeMux()
 	s.registerRoutes(mux)
@@ -36,7 +39,36 @@ func NewServer(cfg *config.Config, log zerolog.Logger) *Server {
 
 func (s *Server) registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /health", s.handleHealth)
-	// TODO: relay NATS → Redis pub/sub se agrega cuando lleguemos a ese flujo
+}
+
+// Reply es la estructura que el notifier devuelve al gateway.
+type Reply struct {
+	Service     string `json:"service"`
+	Message     string `json:"message"`
+	ProcessedAt string `json:"processed_at"`
+}
+
+// StartNATSWorker suscribe al subject switchboard.request y responde.
+func (s *Server) StartNATSWorker() error {
+	_, err := s.nc.Subscribe("switchboard.request", func(msg *nats.Msg) {
+		s.log.Info().
+			Str("subject", msg.Subject).
+			Str("payload", string(msg.Data)).
+			Msg("nats: request received")
+
+		reply := Reply{
+			Service:     "notifier",
+			Message:     fmt.Sprintf("echo: %s", string(msg.Data)),
+			ProcessedAt: time.Now().Format(time.RFC3339Nano),
+		}
+
+		data, _ := json.Marshal(reply)
+
+		if err := msg.Respond(data); err != nil {
+			s.log.Error().Err(err).Msg("nats: respond error")
+		}
+	})
+	return err
 }
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
@@ -46,16 +78,18 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) Start() error {
-	s.log.Info().
-		Str("addr", s.http.Addr).
-		Msg("notifier escuchando")
+	if err := s.StartNATSWorker(); err != nil {
+		return fmt.Errorf("nats worker: %w", err)
+	}
+	s.log.Info().Str("addr", s.http.Addr).Msg("notifier listening")
 	return s.http.ListenAndServe()
 }
 
 func (s *Server) Stop() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+	s.nc.Drain()
 	if err := s.http.Shutdown(ctx); err != nil {
-		s.log.Error().Err(err).Msg("error en shutdown")
+		s.log.Error().Err(err).Msg("shutdown error")
 	}
 }
