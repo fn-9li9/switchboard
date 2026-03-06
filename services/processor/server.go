@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"switchboard/internal/config"
+	"switchboard/internal/events"
 	kafkaclient "switchboard/internal/messaging/kafka"
 	natsclient "switchboard/internal/messaging/nats"
 	pgstore "switchboard/internal/store/postgres"
@@ -89,6 +90,13 @@ func (s *Server) processMessage(msg *sarama.ConsumerMessage) error {
 	if err := natsclient.Publish(s.nc, "switchboard.processed", data); err != nil {
 		s.log.Warn().Err(err).Msg("nats publish result failed")
 	}
+
+	events.Emit(s.nc, s.log, events.FirehoseEvent{
+		Type:    events.TypeKafka,
+		Service: "processor",
+		Action:  "processed",
+		Payload: fmt.Sprintf("id:%d topic:%s", id, msg.Topic),
+	})
 
 	return nil
 }

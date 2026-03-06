@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"switchboard/internal/config"
+	"switchboard/internal/events"
 
 	"github.com/nats-io/nats.go"
 	"github.com/rs/zerolog"
@@ -67,6 +68,13 @@ func (s *Server) StartNATSWorker() error {
 		if err := msg.Respond(data); err != nil {
 			s.log.Error().Err(err).Msg("nats: respond error")
 		}
+
+		events.Emit(s.nc, s.log, events.FirehoseEvent{
+			Type:    events.TypeNATS,
+			Service: "notifier",
+			Action:  "reply",
+			Payload: fmt.Sprintf("subject:%s", msg.Subject),
+		})
 	})
 	return err
 }

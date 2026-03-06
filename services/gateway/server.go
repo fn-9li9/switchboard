@@ -57,53 +57,59 @@ func mustPage(partial string) *template.Template {
 }
 
 func (s *Server) registerRoutes(mux *http.ServeMux) {
-	evh   := handlers.NewEventsHandler(s.pool, s.log)
-	rdh   := handlers.NewRedisHandler(s.rdb, s.log)
-	nath  := handlers.NewNATSHandler(s.nc, s.log)
-	wsh   := handlers.NewWSHandler(s.hub, s.log)
+	evh := handlers.NewEventsHandler(s.pool, s.log, s.nc)
+	rdh := handlers.NewRedisHandler(s.rdb, s.log, s.nc)
+	nath := handlers.NewNATSHandler(s.nc, s.log)
+	wsh := handlers.NewWSHandler(s.hub, s.log, s.nc)
 	kafkah := handlers.NewKafkaHandler(s.producer, s.nc, s.log)
+	firehose := handlers.NewFirehoseHandler(s.nc, s.log)
 
-	indexTmpl    := mustPage("services/gateway/templates/index.html")
+	indexTmpl := mustPage("services/gateway/templates/index.html")
 	postgresTmpl := mustPage("services/gateway/templates/partials/events.html")
-	redisTmpl    := mustPage("services/gateway/templates/partials/redis.html")
-	natsTmpl     := mustPage("services/gateway/templates/partials/nats.html")
-	wsTmpl       := mustPage("services/gateway/templates/partials/ws.html")
-	kafkaTmpl    := mustPage("services/gateway/templates/partials/kafka.html")
+	redisTmpl := mustPage("services/gateway/templates/partials/redis.html")
+	natsTmpl := mustPage("services/gateway/templates/partials/nats.html")
+	firehoseTmpl := mustPage("services/gateway/templates/partials/firehose.html")
+	wsTmpl := mustPage("services/gateway/templates/partials/ws.html")
+	kafkaTmpl := mustPage("services/gateway/templates/partials/kafka.html")
 
 	// Pages
-	mux.HandleFunc("GET /{$}",      s.renderPage(indexTmpl))
+	mux.HandleFunc("GET /{$}", s.renderPage(indexTmpl))
 	mux.HandleFunc("GET /postgres", s.renderPage(postgresTmpl))
-	mux.HandleFunc("GET /redis",    s.renderPage(redisTmpl))
-	mux.HandleFunc("GET /nats",     s.renderPage(natsTmpl))
-	mux.HandleFunc("GET /ws",       s.renderPage(wsTmpl))
-	mux.HandleFunc("GET /kafka",    s.renderPage(kafkaTmpl))
+	mux.HandleFunc("GET /redis", s.renderPage(redisTmpl))
+	mux.HandleFunc("GET /nats", s.renderPage(natsTmpl))
+	mux.HandleFunc("GET /ws", s.renderPage(wsTmpl))
+	mux.HandleFunc("GET /kafka", s.renderPage(kafkaTmpl))
 
 	// Health
 	mux.HandleFunc("GET /health", s.handleHealth)
 
 	// Postgres
-	mux.HandleFunc("GET /events",             evh.List)
-	mux.HandleFunc("POST /events",            evh.Create)
-	mux.HandleFunc("DELETE /events/{id}",     evh.Delete)
+	mux.HandleFunc("GET /events", evh.List)
+	mux.HandleFunc("POST /events", evh.Create)
+	mux.HandleFunc("DELETE /events/{id}", evh.Delete)
 
 	// Redis
-	mux.HandleFunc("POST /redis/set",         rdh.Set)
-	mux.HandleFunc("GET /redis/get",          rdh.Get)
-	mux.HandleFunc("DELETE /redis/del",       rdh.Del)
-	mux.HandleFunc("POST /redis/publish",     rdh.Publish)
-	mux.HandleFunc("GET /redis/subscribe",    rdh.Subscribe)
+	mux.HandleFunc("POST /redis/set", rdh.Set)
+	mux.HandleFunc("GET /redis/get", rdh.Get)
+	mux.HandleFunc("DELETE /redis/del", rdh.Del)
+	mux.HandleFunc("POST /redis/publish", rdh.Publish)
+	mux.HandleFunc("GET /redis/subscribe", rdh.Subscribe)
 
 	// NATS
-	mux.HandleFunc("POST /nats/request",      nath.Request)
-	mux.HandleFunc("GET /nats/subscribe",     nath.Subscribe)
+	mux.HandleFunc("POST /nats/request", nath.Request)
+	mux.HandleFunc("GET /nats/subscribe", nath.Subscribe)
 
 	// WebSocket
-	mux.HandleFunc("GET /ws/connect",         wsh.Connect)
-	mux.HandleFunc("GET /ws/count",           wsh.Count)
+	mux.HandleFunc("GET /ws/connect", wsh.Connect)
+	mux.HandleFunc("GET /ws/count", wsh.Count)
 
 	// Kafka
-	mux.HandleFunc("POST /kafka/produce",     kafkah.Produce)
-	mux.HandleFunc("GET /kafka/results",      kafkah.Results) // SSE — resultados del processor
+	mux.HandleFunc("POST /kafka/produce", kafkah.Produce)
+	mux.HandleFunc("GET /kafka/results", kafkah.Results) // SSE — resultados del processor
+
+	// Firehose
+	mux.HandleFunc("GET /firehose", s.renderPage(firehoseTmpl))
+	mux.HandleFunc("GET /firehose/stream", firehose.Stream)
 }
 
 func (s *Server) renderPage(tmpl *template.Template) http.HandlerFunc {
