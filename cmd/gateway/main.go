@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"switchboard/internal/config"
+	kafkaclient "switchboard/internal/messaging/kafka"
 	natsclient "switchboard/internal/messaging/nats"
 	pgstore "switchboard/internal/store/postgres"
 	rstore "switchboard/internal/store/redis"
@@ -40,7 +41,13 @@ func main() {
 	}
 	defer nc.Close()
 
-	srv := gateway.NewServer(cfg, log, pool, rdb, nc)
+	producer, err := kafkaclient.NewProducer(cfg.Kafka, log)
+	if err != nil {
+		log.Fatal().Err(err).Msg("error creating kafka producer")
+	}
+	defer producer.Close()
+
+	srv := gateway.NewServer(cfg, log, pool, rdb, nc, producer)
 
 	go func() {
 		if err := srv.Start(); err != nil {

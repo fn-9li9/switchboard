@@ -1,28 +1,57 @@
 package main
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"switchboard/internal/config"
+	kafkaclient "switchboard/internal/messaging/kafka"
+	natsclient "switchboard/internal/messaging/nats"
+	pgstore "switchboard/internal/store/postgres"
+	rstore "switchboard/internal/store/redis"
 	"switchboard/services/processor"
 )
 
 func main() {
 	cfg, err := config.Load("processor")
 	if err != nil {
-		os.Stderr.WriteString("error cargando config: " + err.Error() + "\n")
+		os.Stderr.WriteString("error loading config: " + err.Error() + "\n")
 		os.Exit(1)
 	}
 
 	log := config.InitLogger(cfg.Env, cfg.Service)
 
-	srv := processor.NewServer(cfg, log)
+	pool, err := pgstore.NewPool(context.Background(), cfg.Postgres, log)
+	if err != nil {
+		log.Fatal().Err(err).Msg("error connecting postgres")
+	}
+	defer pool.Close()
+
+	rdb, err := rstore.NewClient(context.Background(), cfg.Redis, log)
+	if err != nil {
+		log.Fatal().Err(err).Msg("error connecting redis")
+	}
+	defer rdb.Close()
+
+	nc, err := natsclient.NewConn(cfg.NATS, log)
+	if err != nil {
+		log.Fatal().Err(err).Msg("error connecting nats")
+	}
+	defer nc.Close()
+
+	producer, err := kafkaclient.NewProducer(cfg.Kafka, log)
+	if err != nil {
+		log.Fatal().Err(err).Msg("error creating kafka producer")
+	}
+	defer producer.Close()
+
+	srv := processor.NewServer(cfg, log, pool, rdb, nc, producer)
 
 	go func() {
 		if err := srv.Start(); err != nil {
-			log.Fatal().Err(err).Msg("servidor caído")
+			log.Fatal().Err(err).Msg("server down")
 		}
 	}()
 
@@ -30,6 +59,6 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	log.Info().Msg("apagando servidor...")
+	log.Info().Msg("shutting down...")
 	srv.Stop()
 }
