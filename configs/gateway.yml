@@ -17,3 +17,6 @@ postgres:
   max_conns: 10
   min_conns: 2
   max_idle_secs: 300
+
+notifier_url: http://localhost:8081
+processor_url: http://localhost:8082
