@@ -1,0 +1,131 @@
+{{define "content"}}
+
+<!-- Header -->
+<div class="mb-6 flex items-start justify-between flex-wrap gap-4">
+    <div>
+        <div class="flex items-center gap-2 mb-1">
+            <i data-lucide="flame" class="w-4 h-4 text-ctp-pink"></i>
+            <h2 class="text-ctp-pink text-xs font-bold tracking-widest uppercase font-mono">Firehose</h2>
+        </div>
+        <p class="text-ctp-subtext0 text-sm">
+            All services emit to <code class="text-ctp-mauve font-mono">switchboard.firehose</code> — aggregated in real-time
+        </p>
+    </div>
+
+    <div class="flex items-center gap-2">
+        <button id="fh-btn" onclick="firehoseConnect()" class="flex items-center gap-1.5 bg-ctp-surface0 border border-ctp-pink text-ctp-pink hover:bg-ctp-pink hover:text-ctp-base rounded-lg px-4 py-2 text-xs transition-colors font-mono">
+            <i data-lucide="play" class="w-3 h-3"></i> connect
+        </button>
+        <button onclick="document.getElementById('fh-stream').innerHTML=''" class="flex items-center gap-1.5 bg-ctp-surface0 border border-ctp-surface1 text-ctp-overlay0 hover:text-ctp-red hover:border-ctp-red rounded-lg px-3 py-2 text-xs transition-colors font-mono">
+            <i data-lucide="trash-2" class="w-3 h-3"></i> clear
+        </button>
+    </div>
+</div>
+
+<!-- Status + legend -->
+<div class="flex flex-wrap items-center gap-4 mb-4">
+    <div id="fh-status" class="text-ctp-overlay0 text-xs font-mono italic">not connected</div>
+    <div class="flex items-center gap-3 ml-auto flex-wrap">
+        <span class="text-ctp-green   font-mono text-xs flex items-center gap-1"><i data-lucide="database" class="w-3 h-3"></i> postgres</span>
+        <span class="text-ctp-red     font-mono text-xs flex items-center gap-1"><i data-lucide="server" class="w-3 h-3"></i> redis</span>
+        <span class="text-ctp-sapphire font-mono text-xs flex items-center gap-1"><i data-lucide="radio" class="w-3 h-3"></i> nats</span>
+        <span class="text-ctp-yellow  font-mono text-xs flex items-center gap-1"><i data-lucide="plug" class="w-3 h-3"></i> websocket</span>
+        <span class="text-ctp-peach   font-mono text-xs flex items-center gap-1"><i data-lucide="mail" class="w-3 h-3"></i> kafka</span>
+        <span class="text-ctp-mauve   font-mono text-xs flex items-center gap-1"><i data-lucide="zap" class="w-3 h-3"></i> system</span>
+    </div>
+</div>
+
+<!-- Stream -->
+<div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl overflow-hidden">
+    <!-- Table header -->
+    <div class="fh-row border-b border-ctp-surface1 py-2">
+        <span class="text-ctp-overlay0 font-mono text-xs w-16 shrink-0 uppercase tracking-wider">Time</span>
+        <span class="text-ctp-overlay0 font-mono text-xs w-20 shrink-0 uppercase tracking-wider">Type</span>
+        <span class="text-ctp-overlay0 font-mono text-xs w-20 shrink-0 uppercase tracking-wider">Service</span>
+        <span class="text-ctp-overlay0 font-mono text-xs w-24 shrink-0 uppercase tracking-wider">Action</span>
+        <span class="text-ctp-overlay0 font-mono text-xs flex-1 uppercase tracking-wider">Payload</span>
+    </div>
+
+    <!-- Events -->
+    <div id="fh-stream" class="flex flex-col min-h-64 max-h-[600px] overflow-y-auto p-1">
+        <div class="flex items-center justify-center h-16 text-ctp-overlay0 text-xs font-mono italic">
+            <i data-lucide="loader" class="w-4 h-4 animate-spin mr-2"></i>
+            connect to start streaming events...
+        </div>
+    </div>
+</div>
+
+<!-- Counter -->
+<div class="mt-3 flex items-center gap-4 text-xs font-mono text-ctp-overlay0">
+    <span>total: <span id="fh-count" class="text-ctp-text">0</span></span>
+    <span id="fh-rate"></span>
+</div>
+
+<style type="text/tailwindcss">
+    .fh-row { @apply flex items-center gap-3 px-4 py-1.5 border-b border-ctp-surface0/50 hover:bg-ctp-surface0/30 transition-colors; }
+</style>
+
+<script>
+    let fhEvtSource = null;
+    let fhCount = 0;
+    let fhLastCount = 0;
+
+    // Actualiza la tasa de eventos por segundo cada 5s
+    setInterval( () => {
+        const rate = ( ( fhCount - fhLastCount ) / 5 ).toFixed( 1 );
+        document.getElementById( "fh-rate" ).textContent =
+            fhCount > fhLastCount ? `${ rate } ev/s` : "";
+        fhLastCount = fhCount;
+    }, 5000 );
+
+    function firehoseConnect () {
+        if ( fhEvtSource ) { fhEvtSource.close(); fhEvtSource = null; }
+
+        const status = document.getElementById( "fh-status" );
+        const btn = document.getElementById( "fh-btn" );
+        const stream = document.getElementById( "fh-stream" );
+
+        status.textContent = "connecting...";
+        status.className = "text-ctp-yellow text-xs font-mono";
+
+        fhEvtSource = new EventSource( "/firehose/stream" );
+
+        fhEvtSource.addEventListener( "connected", () => {
+            status.textContent = "● streaming";
+            status.className = "text-ctp-pink text-xs font-mono animate-pulse";
+            btn.innerHTML = `<i data-lucide="stop-circle" class="w-3 h-3"></i> disconnect`;
+            btn.onclick = firehoseDisconnect;
+            stream.innerHTML = "";
+            lucide.createIcons();
+        } );
+
+        fhEvtSource.addEventListener( "event", ( e ) => {
+            const stream = document.getElementById( "fh-stream" );
+            fhCount++;
+            document.getElementById( "fh-count" ).textContent = fhCount;
+            stream.innerHTML = e.data + stream.innerHTML;
+            // Limitar a 200 filas para no saturar el DOM
+            const rows = stream.querySelectorAll( ".fh-row" );
+            if ( rows.length > 200 ) rows[ rows.length - 1 ].remove();
+        } );
+
+        fhEvtSource.onerror = () => {
+            status.textContent = "disconnected";
+            status.className = "text-ctp-red text-xs font-mono italic";
+        };
+    }
+
+    function firehoseDisconnect () {
+        if ( fhEvtSource ) { fhEvtSource.close(); fhEvtSource = null; }
+        const status = document.getElementById( "fh-status" );
+        const btn = document.getElementById( "fh-btn" );
+        status.textContent = "not connected";
+        status.className = "text-ctp-overlay0 text-xs font-mono italic";
+        status.style.animation = "";
+        btn.innerHTML = `<i data-lucide="play" class="w-3 h-3"></i> connect`;
+        btn.onclick = firehoseConnect;
+        lucide.createIcons();
+    }
+</script>
+
+{{end}}
