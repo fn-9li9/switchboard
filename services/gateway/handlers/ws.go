@@ -6,9 +6,11 @@ import (
 	"strings"
 	"time"
 
+	"switchboard/internal/events"
 	ws "switchboard/internal/transport/ws"
 
 	"github.com/gorilla/websocket"
+	"github.com/nats-io/nats.go"
 	"github.com/rs/zerolog"
 )
 
@@ -21,10 +23,11 @@ var upgrader = websocket.Upgrader{
 type WSHandler struct {
 	hub *ws.Hub
 	log zerolog.Logger
+	nc  *nats.Conn
 }
 
-func NewWSHandler(hub *ws.Hub, log zerolog.Logger) *WSHandler {
-	return &WSHandler{hub: hub, log: log}
+func NewWSHandler(hub *ws.Hub, log zerolog.Logger, nc *nats.Conn) *WSHandler {
+	return &WSHandler{hub: hub, log: log, nc: nc}
 }
 
 // GET /ws/connect?username=... — upgrade a WebSocket
@@ -56,6 +59,12 @@ func (h *WSHandler) Connect(w http.ResponseWriter, r *http.Request) {
 		}
 		h.log.Debug().Str("from", username).Str("msg", text).Msg("ws message")
 		h.hub.Broadcast(chatMsg(username, text))
+		events.Emit(h.nc, h.log, events.FirehoseEvent{
+			Type:    events.TypeWebSocket,
+			Service: "gateway",
+			Action:  "message",
+			Payload: fmt.Sprintf("%s: %s", username, text),
+		})
 	})
 
 	// Al salir del ReadPump el cliente se desconectó

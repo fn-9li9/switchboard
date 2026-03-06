@@ -8,19 +8,22 @@ import (
 	"strconv"
 	"time"
 
+	"switchboard/internal/events"
 	pgstore "switchboard/internal/store/postgres"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/nats-io/nats.go"
 	"github.com/rs/zerolog"
 )
 
 type EventsHandler struct {
 	pool *pgxpool.Pool
 	log  zerolog.Logger
+	nc   *nats.Conn
 }
 
-func NewEventsHandler(pool *pgxpool.Pool, log zerolog.Logger) *EventsHandler {
-	return &EventsHandler{pool: pool, log: log}
+func NewEventsHandler(pool *pgxpool.Pool, log zerolog.Logger, nc *nats.Conn) *EventsHandler {
+	return &EventsHandler{pool: pool, log: log, nc: nc}
 }
 
 // POST /events — crea un evento desde el form HTMX
@@ -57,6 +60,13 @@ func (h *EventsHandler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "error guardando evento", http.StatusInternalServerError)
 		return
 	}
+
+	events.Emit(h.nc, h.log, events.FirehoseEvent{
+		Type:    events.TypePostgres,
+		Service: "gateway",
+		Action:  "insert",
+		Payload: fmt.Sprintf("id:%d topic:%s", id, topic),
+	})
 
 	h.log.Info().Int64("id", id).Str("topic", topic).Msg("evento creado")
 

@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"switchboard/internal/events"
 	"time"
 
+	"github.com/nats-io/nats.go"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
 )
@@ -13,10 +15,11 @@ import (
 type RedisHandler struct {
 	rdb *redis.Client
 	log zerolog.Logger
+	nc  *nats.Conn
 }
 
-func NewRedisHandler(rdb *redis.Client, log zerolog.Logger) *RedisHandler {
-	return &RedisHandler{rdb: rdb, log: log}
+func NewRedisHandler(rdb *redis.Client, log zerolog.Logger, nc *nats.Conn) *RedisHandler {
+	return &RedisHandler{rdb: rdb, log: log, nc: nc}
 }
 
 // POST /redis/set — guarda key/value con TTL opcional
@@ -45,6 +48,13 @@ func (h *RedisHandler) Set(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "error setting key", http.StatusInternalServerError)
 		return
 	}
+
+	events.Emit(h.nc, h.log, events.FirehoseEvent{
+		Type:    events.TypeRedis,
+		Service: "gateway",
+		Action:  "set",
+		Payload: fmt.Sprintf("%s = %s", key, value),
+	})
 
 	h.log.Info().Str("key", key).Msg("redis set")
 	w.Header().Set("Content-Type", "text/html")
@@ -154,6 +164,12 @@ func (h *RedisHandler) Publish(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	events.Emit(h.nc, h.log, events.FirehoseEvent{
+		Type:    events.TypeRedis,
+		Service: "gateway",
+		Action:  "publish",
+		Payload: fmt.Sprintf("channel:%s msg:%s", channel, message),
+	})
 	h.log.Info().Str("channel", channel).Str("message", message).Msg("redis publish")
 	w.Header().Set("Content-Type", "text/html")
 	fmt.Fprintf(w, `<div class="pubsub-row">

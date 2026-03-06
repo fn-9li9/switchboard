@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"switchboard/internal/events"
 	"time"
 
 	"github.com/nats-io/nats.go"
@@ -59,6 +60,13 @@ func (h *NATSHandler) Request(w http.ResponseWriter, r *http.Request) {
 			replyText = v
 		}
 	}
+
+	events.Emit(h.nc, h.log, events.FirehoseEvent{
+		Type:    events.TypeNATS,
+		Service: "gateway",
+		Action:  "request",
+		Payload: fmt.Sprintf("subject:%s latency:%s", subject, formatLatency(latency)),
+	})
 
 	h.log.Info().
 		Str("subject", subject).
