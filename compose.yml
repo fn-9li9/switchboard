@@ -1,0 +1,130 @@
+services:
+  # ─── Infrastructure ──────────────────────────────────────────
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: switchboard-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: switchboard
+      POSTGRES_PASSWORD: switchboard
+      POSTGRES_DB: switchboard
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U switchboard" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: switchboard-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  nats:
+    image: nats:2.10-alpine
+    container_name: switchboard-nats
+    restart: unless-stopped
+    command: [ "-js", "-m", "8222" ]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:8222/healthz || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: switchboard-zookeeper
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_logs:/var/lib/zookeeper/log
+    healthcheck:
+      test: [ "CMD-SHELL", "zookeeper-shell localhost:2181 ls / > /dev/null 2>&1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: switchboard-kafka
+    restart: unless-stopped
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: [ "CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list" ]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  # ─── Observability ───────────────────────────────────────────
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: switchboard-redisinsight
+    restart: unless-stopped
+    depends_on:
+      - redis
+    ports:
+      - "5540:5540"
+    profiles: [ "tools" ]
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: switchboard-kafka-ui
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_CLUSTERS_0_NAME: switchboard
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    ports:
+      - "8090:8080"
+    profiles: [ "tools" ]
+
+volumes:
+  postgres_data:
+  redis_data:
+  zookeeper_data:
+  zookeeper_logs:
+  kafka_data:
+
+
+networks:
+  default:
+    name: switchboard-net
