@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"switchboard/internal/config"
+	natsclient "switchboard/internal/messaging/nats"
 	pgstore "switchboard/internal/store/postgres"
 	rstore "switchboard/internal/store/redis"
 	"switchboard/services/gateway"
@@ -33,7 +34,13 @@ func main() {
 	}
 	defer rdb.Close()
 
-	srv := gateway.NewServer(cfg, log, pool, rdb)
+	nc, err := natsclient.NewConn(cfg.NATS, log)
+	if err != nil {
+		log.Fatal().Err(err).Msg("error connecting nats")
+	}
+	defer nc.Close()
+
+	srv := gateway.NewServer(cfg, log, pool, rdb, nc)
 
 	go func() {
 		if err := srv.Start(); err != nil {
