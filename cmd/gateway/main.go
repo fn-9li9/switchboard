@@ -8,13 +8,14 @@ import (
 
 	"switchboard/internal/config"
 	pgstore "switchboard/internal/store/postgres"
+	rstore "switchboard/internal/store/redis"
 	"switchboard/services/gateway"
 )
 
 func main() {
 	cfg, err := config.Load("gateway")
 	if err != nil {
-		os.Stderr.WriteString("error cargando config: " + err.Error() + "\n")
+		os.Stderr.WriteString("error loading config: " + err.Error() + "\n")
 		os.Exit(1)
 	}
 
@@ -22,15 +23,21 @@ func main() {
 
 	pool, err := pgstore.NewPool(context.Background(), cfg.Postgres, log)
 	if err != nil {
-		log.Fatal().Err(err).Msg("error conectando postgres")
+		log.Fatal().Err(err).Msg("error connecting postgres")
 	}
 	defer pool.Close()
 
-	srv := gateway.NewServer(cfg, log, pool)
+	rdb, err := rstore.NewClient(context.Background(), cfg.Redis, log)
+	if err != nil {
+		log.Fatal().Err(err).Msg("error connecting redis")
+	}
+	defer rdb.Close()
+
+	srv := gateway.NewServer(cfg, log, pool, rdb)
 
 	go func() {
 		if err := srv.Start(); err != nil {
-			log.Fatal().Err(err).Msg("servidor caído")
+			log.Fatal().Err(err).Msg("server down")
 		}
 	}()
 
@@ -38,6 +45,6 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	log.Info().Msg("apagando servidor...")
+	log.Info().Msg("shutting down...")
 	srv.Stop()
 }
