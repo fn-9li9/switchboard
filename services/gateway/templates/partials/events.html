@@ -1,0 +1,37 @@
+{{define "content"}}
+
+<!-- Header -->
+<div class="mb-6">
+    <h2 class="text-ctp-green text-xs font-bold tracking-widest uppercase mb-1">Postgres</h2>
+    <p class="text-ctp-subtext0 text-sm">CRUD directo con <code class="text-ctp-mauve">pgx/v5</code> — sin ORM</p>
+</div>
+
+<!-- Form -->
+<form hx-post="/events" hx-target="#events-body" hx-swap="afterbegin" hx-on::after-request="this.reset()" class="flex flex-wrap gap-2 mb-6">
+    <input name="source" placeholder="source" required class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-green text-ctp-text placeholder-ctp-overlay0 rounded px-3 py-1.5 text-sm outline-none transition-colors" />
+    <input name="topic" placeholder="topic" required class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-green text-ctp-text placeholder-ctp-overlay0 rounded px-3 py-1.5 text-sm outline-none transition-colors" />
+    <input name="payload" placeholder='{"key":"value"}' class="bg-ctp-surface0 border border-ctp-surface1 focus:border-ctp-green text-ctp-text placeholder-ctp-overlay0 rounded px-3 py-1.5 text-sm outline-none transition-colors w-64" />
+    <button type="submit" class="bg-ctp-surface0 border border-ctp-green text-ctp-green hover:bg-ctp-green hover:text-ctp-base rounded px-4 py-1.5 text-sm transition-colors">
+        + insertar
+    </button>
+</form>
+
+<!-- Tabla -->
+<div class="bg-ctp-mantle border border-ctp-surface1 rounded-lg overflow-hidden">
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="border-b border-ctp-surface1">
+                <th class="text-left px-4 py-2 text-ctp-overlay1 text-xs uppercase tracking-wider font-medium w-16">ID</th>
+                <th class="text-left px-4 py-2 text-ctp-overlay1 text-xs uppercase tracking-wider font-medium">Source</th>
+                <th class="text-left px-4 py-2 text-ctp-overlay1 text-xs uppercase tracking-wider font-medium">Topic</th>
+                <th class="text-left px-4 py-2 text-ctp-overlay1 text-xs uppercase tracking-wider font-medium">Payload</th>
+                <th class="text-left px-4 py-2 text-ctp-overlay1 text-xs uppercase tracking-wider font-medium">Created At</th>
+                <th class="w-10"></th>
+            </tr>
+        </thead>
+        <tbody id="events-body" hx-get="/events" hx-trigger="load" hx-swap="innerHTML">
+        </tbody>
+    </table>
+</div>
+
+{{end}}
