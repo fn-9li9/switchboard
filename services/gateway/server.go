@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"io"
 	"net/http"
 	"time"
 
@@ -82,6 +83,10 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 
 	// Health
 	mux.HandleFunc("GET /health", s.handleHealth)
+	// Health checks proxy — evita CORS en el browser
+	mux.HandleFunc("GET /health/gateway", s.handleHealth)
+	mux.HandleFunc("GET /health/notifier", s.proxyHealth("http://localhost:8081/health"))
+	mux.HandleFunc("GET /health/processor", s.proxyHealth("http://localhost:8082/health"))
 
 	// Postgres
 	mux.HandleFunc("GET /events", evh.List)
@@ -137,5 +142,21 @@ func (s *Server) Stop() {
 	defer cancel()
 	if err := s.http.Shutdown(ctx); err != nil {
 		s.log.Error().Err(err).Msg("shutdown error")
+	}
+}
+
+func (s *Server) proxyHealth(target string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		resp, err := http.Get(target)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusServiceUnavailable)
+			w.Write([]byte(`{"status":"error","service":"unreachable"}`))
+			return
+		}
+		defer resp.Body.Close()
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(resp.StatusCode)
+		io.Copy(w, resp.Body)
 	}
 }

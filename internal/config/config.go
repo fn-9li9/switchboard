@@ -41,13 +41,15 @@ type KafkaConfig struct {
 // Config contiene todos los campos posibles. Cada servicio solo usa
 // los que necesita; los demás quedan en zero-value.
 type Config struct {
-	Env      string         `mapstructure:"env"`
-	Service  string         `mapstructure:"service"`
-	Server   ServerConfig   `mapstructure:"server"`
-	Postgres PostgresConfig `mapstructure:"postgres"`
-	Redis    RedisConfig    `mapstructure:"redis"`
-	NATS     NATSConfig     `mapstructure:"nats"`
-	Kafka    KafkaConfig    `mapstructure:"kafka"`
+	Env          string         `mapstructure:"env"`
+	Service      string         `mapstructure:"service"`
+	Server       ServerConfig   `mapstructure:"server"`
+	Postgres     PostgresConfig `mapstructure:"postgres"`
+	Redis        RedisConfig    `mapstructure:"redis"`
+	NATS         NATSConfig     `mapstructure:"nats"`
+	Kafka        KafkaConfig    `mapstructure:"kafka"`
+	NotifierURL  string         `mapstructure:"notifier_url"`
+	ProcessorURL string         `mapstructure:"processor_url"`
 }
 
 // ── Loader ─────────────────────────────────────────────────────────────────
@@ -58,6 +60,8 @@ type Config struct {
 //
 //	GATEWAY_SERVER_PORT=9090   → config.Server.Port = 9090
 //	PROCESSOR_POSTGRES_DSN=... → config.Postgres.DSN = "..."
+//	PROCESSOR_NOTIFIER_URL=... → config.NotifierURL = "..."
+//	PROCESSOR_PROCESSOR_URL=... → config.ProcessorURL = "..."
 //
 // El prefijo es el nombre del servicio en mayúsculas.
 func Load(service string) (*Config, error) {
@@ -68,6 +72,10 @@ func Load(service string) (*Config, error) {
 	v.SetConfigType("yaml")
 	v.AddConfigPath("configs/")
 	v.AddConfigPath("../../configs/") // útil si se ejecuta desde cmd/<service>/
+
+	// Defaults para URLs de notifier y processor
+	v.SetDefault("notifier_url", "http://localhost:8081")
+	v.SetDefault("processor_url", "http://localhost:8082")
 
 	// Overrides por env vars: GATEWAY_SERVER_PORT → server.port
 	v.SetEnvPrefix(strings.ToUpper(service))
