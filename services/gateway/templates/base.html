@@ -48,29 +48,18 @@
       --color-ctp-mantle:    #181825;
       --color-ctp-crust:     #11111b;
 
-      --font-sans:  "Albert Sans", sans-serif;
+      --font-sans:    "Albert Sans", sans-serif;
       --font-display: "Poppins", sans-serif;
-      --font-mono:  "JetBrains Mono", monospace;
+      --font-mono:    "JetBrains Mono", monospace;
     }
 
     html { scroll-behavior: smooth; }
-    /* -- scrollbar */
-    ::-webkit-scrollbar {
-        width: 10px;
-    }
 
-    ::-webkit-scrollbar-track {
-        background: #181825;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: linear-gradient(to bottom, #cba6f7, #f38ba8);
-        border-radius: 5px;
-    }
+    ::-webkit-scrollbar       { width: 8px; }
+    ::-webkit-scrollbar-track { background: #181825; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(to bottom, #cba6f7, #f38ba8); border-radius: 4px; }
   </style>
 </head>
-
-
 
 <body class="bg-ctp-base text-ctp-text font-sans flex flex-col min-h-screen">
 
@@ -80,32 +69,20 @@
             <i data-lucide="zap" class="w-4 h-4"></i>
             switchboard
         </a>
-        <a href="/postgres" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-green    hover:bg-ctp-surface0 transition-colors text-sm">
-            <i data-lucide="database" class="w-3.5 h-3.5"></i> Postgres
-        </a>
-        <a href="/redis" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-red      hover:bg-ctp-surface0 transition-colors text-sm">
-            <i data-lucide="server" class="w-3.5 h-3.5"></i> Redis
-        </a>
-        <a href="/nats" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-sapphire  hover:bg-ctp-surface0 transition-colors text-sm">
-            <i data-lucide="radio" class="w-3.5 h-3.5"></i> NATS
-        </a>
-        <a href="/ws" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-yellow   hover:bg-ctp-surface0 transition-colors text-sm">
-            <i data-lucide="plug" class="w-3.5 h-3.5"></i> WebSocket
-        </a>
-        <a href="/kafka" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-peach    hover:bg-ctp-surface0 transition-colors text-sm">
-            <i data-lucide="mail" class="w-3.5 h-3.5"></i> Kafka
-        </a>
-        <a href="/firehose" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-pink     hover:bg-ctp-surface0 transition-colors text-sm">
-            <i data-lucide="flame" class="w-3.5 h-3.5"></i> Firehose
-        </a>
+        <a href="/postgres" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-green    hover:bg-ctp-surface0 transition-colors text-sm"><i data-lucide="database" class="w-3.5 h-3.5"></i> Postgres</a>
+        <a href="/redis" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-red      hover:bg-ctp-surface0 transition-colors text-sm"><i data-lucide="server" class="w-3.5 h-3.5"></i> Redis</a>
+        <a href="/nats" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-sapphire  hover:bg-ctp-surface0 transition-colors text-sm"><i data-lucide="radio" class="w-3.5 h-3.5"></i> NATS</a>
+        <a href="/ws" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-yellow   hover:bg-ctp-surface0 transition-colors text-sm"><i data-lucide="plug" class="w-3.5 h-3.5"></i> WebSocket</a>
+        <a href="/kafka" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-peach    hover:bg-ctp-surface0 transition-colors text-sm"><i data-lucide="mail" class="w-3.5 h-3.5"></i> Kafka</a>
+        <a href="/firehose" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-pink     hover:bg-ctp-surface0 transition-colors text-sm"><i data-lucide="flame" class="w-3.5 h-3.5"></i> Firehose</a>
     </nav>
 
-    <!-- Main ocupa todo el espacio disponible empujando el footer al fondo -->
+    <!-- Main -->
     <main class="flex-1 max-w-6xl w-full mx-auto px-6 py-8">
         {{template "content" .}}
     </main>
 
-    <!-- Footer siempre al fondo, visible solo con scroll si el contenido es largo -->
+    <!-- Footer -->
     <footer class="border-t border-ctp-surface1">
         <div class="max-w-6xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
 
@@ -120,7 +97,7 @@
                 <p class="text-ctp-overlay0 text-xs font-mono text-center md:text-left leading-relaxed">
                     A connection board that routes<br>signals between systems.
                 </p>
-                <a href="https://github.com/fn-9li9/switchboard" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-ctp-overlay0 hover:text-ctp-mauve transition-colors text-xs font-sans mt-1">
+                <a href="https://github.com/fn-9li9/switchboard" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-ctp-overlay0 hover:text-ctp-mauve transition-colors text-xs mt-1">
                     <i data-lucide="github" class="w-4 h-4"></i>
                     fn-9li9
                 </a>
@@ -137,21 +114,32 @@
                 <a href="/firehose" class="flex items-center gap-2 text-ctp-subtext0 hover:text-ctp-pink     transition-colors text-xs"><i data-lucide="flame" class="w-3.5 h-3.5"></i> Firehose</a>
             </div>
 
-            <!-- Services + Stack -->
+            <!-- Services con health check live -->
             <div class="flex flex-col gap-2">
                 <span class="text-ctp-overlay0 text-xs uppercase tracking-widest font-mono mb-1">Services</span>
+
+                <!-- gateway -->
                 <div class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0">
-                    <i data-lucide="circle-dot" class="w-3 h-3 text-ctp-green"></i>
-                    gateway <span class="text-ctp-overlay0 ml-1">:8080</span>
+                    <span id="footer-health-gateway" class="w-2 h-2 rounded-full bg-ctp-peach animate-pulse shrink-0"></span>
+                    gateway
+                    <span class="text-ctp-overlay0">:8080</span>
                 </div>
+
+                <!-- notifier -->
                 <div class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0">
-                    <i data-lucide="circle-dot" class="w-3 h-3 text-ctp-surface2"></i>
-                    notifier <span class="text-ctp-overlay0 ml-1">:8081</span>
+                    <span id="footer-health-notifier" class="w-2 h-2 rounded-full bg-ctp-peach animate-pulse shrink-0"></span>
+                    notifier
+                    <span class="text-ctp-overlay0">:8081</span>
                 </div>
+
+                <!-- processor -->
                 <div class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0">
-                    <i data-lucide="circle-dot" class="w-3 h-3 text-ctp-surface2"></i>
-                    processor <span class="text-ctp-overlay0 ml-1">:8082</span>
+                    <span id="footer-health-processor" class="w-2 h-2 rounded-full bg-ctp-peach animate-pulse shrink-0"></span>
+                    processor
+                    <span class="text-ctp-overlay0">:8082</span>
                 </div>
+
+                <!-- Stack -->
                 <span class="text-ctp-overlay0 text-xs uppercase tracking-widest font-mono mt-4 mb-1">Stack</span>
                 <div class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0">
                     <i data-lucide="code-2" class="w-3 h-3 text-ctp-sapphire"></i> Go 1.25
@@ -177,10 +165,46 @@
         </div>
     </footer>
 
-    <!-- Init Lucide icons after DOM is ready -->
     <script>
         lucide.createIcons();
         document.body.addEventListener( "htmx:afterSwap", () => lucide.createIcons() );
+
+        // ── Health checks ──────────────────────────────────────────
+        const services = [
+            { name: "gateway", url: "/health/gateway", dotId: "footer-health-gateway" },
+            { name: "notifier", url: "/health/notifier", dotId: "footer-health-notifier" },
+            { name: "processor", url: "/health/processor", dotId: "footer-health-processor" },
+        ];
+
+        async function checkHealth ( svc ) {
+            const dot = document.getElementById( svc.dotId );
+            if ( !dot ) return;
+
+            // Mientras chequea: peach pulsando
+            dot.className = "w-2 h-2 rounded-full bg-ctp-peach animate-pulse shrink-0";
+
+            try {
+                const res = await fetch( svc.url, { signal: AbortSignal.timeout( 3000 ) } );
+                if ( res.ok ) {
+                    const data = await res.json();
+                    if ( data.status === "ok" ) {
+                        dot.className = "w-2 h-2 rounded-full bg-ctp-green shrink-0";
+                        return;
+                    }
+                }
+                dot.className = "w-2 h-2 rounded-full bg-ctp-red shrink-0";
+            } catch {
+                dot.className = "w-2 h-2 rounded-full bg-ctp-red shrink-0";
+            }
+        }
+
+        function checkAllHealth () {
+            services.forEach( checkHealth );
+        }
+
+        // Check inicial + cada 15s
+        checkAllHealth();
+        setInterval( checkAllHealth, 15000 );
     </script>
 </body>
 
