@@ -57,39 +57,41 @@
 
 
 
-<body class="bg-ctp-base text-ctp-text min-h-screen font-sans">
+<body class="bg-ctp-base text-ctp-text font-sans flex flex-col min-h-screen">
 
-    <nav class="bg-ctp-mantle border-b border-ctp-surface1 px-6 py-3 flex items-center gap-1">
+    <!-- Sticky navbar -->
+    <nav class="sticky top-0 z-50 bg-ctp-mantle border-b border-ctp-surface1 px-6 py-3 flex items-center gap-1">
         <a href="/" class="flex items-center gap-2 text-ctp-mauve font-display font-bold text-base tracking-widest mr-6">
             <i data-lucide="zap" class="w-4 h-4"></i>
             switchboard
         </a>
-        <a href="/postgres" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-green   hover:bg-ctp-surface0 transition-colors text-sm">
+        <a href="/postgres" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-green    hover:bg-ctp-surface0 transition-colors text-sm">
             <i data-lucide="database" class="w-3.5 h-3.5"></i> Postgres
         </a>
-        <a href="/redis" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-red     hover:bg-ctp-surface0 transition-colors text-sm">
+        <a href="/redis" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-red      hover:bg-ctp-surface0 transition-colors text-sm">
             <i data-lucide="server" class="w-3.5 h-3.5"></i> Redis
         </a>
-        <a href="/nats" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-sapphire hover:bg-ctp-surface0 transition-colors text-sm">
+        <a href="/nats" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-sapphire  hover:bg-ctp-surface0 transition-colors text-sm">
             <i data-lucide="radio" class="w-3.5 h-3.5"></i> NATS
         </a>
-        <a href="/ws" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-yellow  hover:bg-ctp-surface0 transition-colors text-sm">
+        <a href="/ws" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-yellow   hover:bg-ctp-surface0 transition-colors text-sm">
             <i data-lucide="plug" class="w-3.5 h-3.5"></i> WebSocket
         </a>
-        <a href="/kafka" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-peach   hover:bg-ctp-surface0 transition-colors text-sm">
+        <a href="/kafka" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-peach    hover:bg-ctp-surface0 transition-colors text-sm">
             <i data-lucide="mail" class="w-3.5 h-3.5"></i> Kafka
         </a>
-        <a href="/firehose" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-pink    hover:bg-ctp-surface0 transition-colors text-sm">
+        <a href="/firehose" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-pink     hover:bg-ctp-surface0 transition-colors text-sm">
             <i data-lucide="flame" class="w-3.5 h-3.5"></i> Firehose
         </a>
     </nav>
 
-    <main class="max-w-6xl mx-auto px-6 py-8">
+    <!-- Main ocupa todo el espacio disponible empujando el footer al fondo -->
+    <main class="flex-1 max-w-6xl w-full mx-auto px-6 py-8">
         {{template "content" .}}
     </main>
 
-    <!-- Footer -->
-    <footer class="border-t border-ctp-surface1 mt-16">
+    <!-- Footer siempre al fondo, visible solo con scroll si el contenido es largo -->
+    <footer class="border-t border-ctp-surface1">
         <div class="max-w-6xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
 
             <!-- Brand -->
@@ -112,15 +114,15 @@
             <!-- Flows -->
             <div class="flex flex-col gap-2">
                 <span class="text-ctp-overlay0 text-xs uppercase tracking-widest font-mono mb-1">Flows</span>
-                <a href="/postgres" class="flex items-center gap-2 text-ctp-subtext0 hover:text-ctp-green   transition-colors text-xs font-sans"><i data-lucide="database" class="w-3.5 h-3.5"></i> Postgres</a>
-                <a href="/redis" class="flex items-center gap-2 text-ctp-subtext0 hover:text-ctp-red     transition-colors text-xs font-sans"><i data-lucide="server" class="w-3.5 h-3.5"></i> Redis</a>
-                <a href="/nats" class="flex items-center gap-2 text-ctp-subtext0 hover:text-ctp-sapphire transition-colors text-xs font-sans"><i data-lucide="radio" class="w-3.5 h-3.5"></i> NATS</a>
-                <a href="/ws" class="flex items-center gap-2 text-ctp-subtext0 hover:text-ctp-yellow  transition-colors text-xs font-sans"><i data-lucide="plug" class="w-3.5 h-3.5"></i> WebSocket</a>
-                <a href="/kafka" class="flex items-center gap-2 text-ctp-subtext0 hover:text-ctp-peach   transition-colors text-xs font-sans"><i data-lucide="mail" class="w-3.5 h-3.5"></i> Kafka</a>
-                <a href="/firehose" class="flex items-center gap-2 text-ctp-subtext0 hover:text-ctp-pink    transition-colors text-xs font-sans"><i data-lucide="flame" class="w-3.5 h-3.5"></i> Firehose</a>
+                <a href="/postgres" class="flex items-center gap-2 text-ctp-subtext0 hover:text-ctp-green    transition-colors text-xs"><i data-lucide="database" class="w-3.5 h-3.5"></i> Postgres</a>
+                <a href="/redis" class="flex items-center gap-2 text-ctp-subtext0 hover:text-ctp-red      transition-colors text-xs"><i data-lucide="server" class="w-3.5 h-3.5"></i> Redis</a>
+                <a href="/nats" class="flex items-center gap-2 text-ctp-subtext0 hover:text-ctp-sapphire transition-colors text-xs"><i data-lucide="radio" class="w-3.5 h-3.5"></i> NATS</a>
+                <a href="/ws" class="flex items-center gap-2 text-ctp-subtext0 hover:text-ctp-yellow   transition-colors text-xs"><i data-lucide="plug" class="w-3.5 h-3.5"></i> WebSocket</a>
+                <a href="/kafka" class="flex items-center gap-2 text-ctp-subtext0 hover:text-ctp-peach    transition-colors text-xs"><i data-lucide="mail" class="w-3.5 h-3.5"></i> Kafka</a>
+                <a href="/firehose" class="flex items-center gap-2 text-ctp-subtext0 hover:text-ctp-pink     transition-colors text-xs"><i data-lucide="flame" class="w-3.5 h-3.5"></i> Firehose</a>
             </div>
 
-            <!-- Services -->
+            <!-- Services + Stack -->
             <div class="flex flex-col gap-2">
                 <span class="text-ctp-overlay0 text-xs uppercase tracking-widest font-mono mb-1">Services</span>
                 <div class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0">
@@ -135,8 +137,6 @@
                     <i data-lucide="circle-dot" class="w-3 h-3 text-ctp-surface2"></i>
                     processor <span class="text-ctp-overlay0 ml-1">:8082</span>
                 </div>
-
-                <!-- Stack -->
                 <span class="text-ctp-overlay0 text-xs uppercase tracking-widest font-mono mt-4 mb-1">Stack</span>
                 <div class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0">
                     <i data-lucide="code-2" class="w-3 h-3 text-ctp-sapphire"></i> Go 1.25

@@ -1,76 +1,228 @@
 {{define "content"}}
-<div class="flex flex-col items-center justify-center min-h-[70vh] gap-10 text-center">
+<div class="flex flex-col items-center gap-16">
 
     <!-- Hero -->
-    <div class="flex flex-col items-center gap-3">
-        <div class="p-3 bg-ctp-surface0 rounded-2xl border border-ctp-surface1">
+    <div class="flex flex-col items-center gap-4 text-center pt-8">
+        <div class="p-3">
             <i data-lucide="zap" class="w-10 h-10 text-ctp-mauve"></i>
         </div>
-        <h1 class="font-display font-bold text-4xl text-ctp-mauve tracking-widest">switchboard</h1>
+        <h1 class="font-display font-bold text-5xl text-ctp-mauve tracking-widest">switchboard</h1>
         <p class="text-ctp-overlay1 text-xs tracking-[0.3em] uppercase font-mono">Go Polyglot Playground</p>
+        <p class="text-ctp-subtext1 max-w-lg leading-relaxed text-sm mt-2">
+            A connection board that routes signals between systems.<br>
+            3 microservices · 6 flows · real-time.
+        </p>
     </div>
-
-    <!-- Description -->
-    <p class="text-ctp-subtext1 max-w-lg leading-relaxed text-sm">
-        A connection board that routes signals between systems.<br>
-        3 microservices · 6 flows · real-time.
-    </p>
 
     <!-- Flow cards -->
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 w-full max-w-2xl">
+    <div class="w-full max-w-3xl">
+        <h2 class="text-ctp-overlay0 text-xs uppercase tracking-widest font-mono mb-4 flex items-center gap-2">
+            <i data-lucide="layers" class="w-3.5 h-3.5"></i> Flows
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
 
-        <a href="/postgres" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-green rounded-xl p-4 transition-all text-left">
-            <i data-lucide="database" class="w-5 h-5 text-ctp-green mb-2"></i>
-            <div class="text-ctp-text text-sm font-semibold font-display">Postgres</div>
-            <div class="text-ctp-subtext0 text-xs mt-1 font-mono">CRUD · infinite scroll · hx-swap</div>
-        </a>
+            <a href="/postgres" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-green rounded-xl p-4 transition-all">
+                <i data-lucide="database" class="w-5 h-5 text-ctp-green mb-3"></i>
+                <div class="text-ctp-text text-sm font-semibold font-display">Postgres</div>
+                <div class="text-ctp-subtext0 text-xs mt-1 font-mono leading-relaxed">CRUD · infinite scroll · hx-swap</div>
+                <div class="mt-3 flex items-center gap-1 text-ctp-overlay0 text-xs group-hover:text-ctp-green transition-colors">
+                    <span>explore</span><i data-lucide="arrow-right" class="w-3 h-3"></i>
+                </div>
+            </a>
 
-        <a href="/redis" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-red rounded-xl p-4 transition-all text-left">
-            <i data-lucide="server" class="w-5 h-5 text-ctp-red mb-2"></i>
-            <div class="text-ctp-text text-sm font-semibold font-display">Redis</div>
-            <div class="text-ctp-subtext0 text-xs mt-1 font-mono">get/set · pub/sub · SSE</div>
-        </a>
+            <a href="/redis" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-red rounded-xl p-4 transition-all">
+                <i data-lucide="server" class="w-5 h-5 text-ctp-red mb-3"></i>
+                <div class="text-ctp-text text-sm font-semibold font-display">Redis</div>
+                <div class="text-ctp-subtext0 text-xs mt-1 font-mono leading-relaxed">get/set · pub/sub · SSE</div>
+                <div class="mt-3 flex items-center gap-1 text-ctp-overlay0 text-xs group-hover:text-ctp-red transition-colors">
+                    <span>explore</span><i data-lucide="arrow-right" class="w-3 h-3"></i>
+                </div>
+            </a>
 
-        <a href="/nats" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-sapphire rounded-xl p-4 transition-all text-left">
-            <i data-lucide="radio" class="w-5 h-5 text-ctp-sapphire mb-2"></i>
-            <div class="text-ctp-text text-sm font-semibold font-display">NATS</div>
-            <div class="text-ctp-subtext0 text-xs mt-1 font-mono">request/reply · sub-ms latency</div>
-        </a>
+            <a href="/nats" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-sapphire rounded-xl p-4 transition-all">
+                <i data-lucide="radio" class="w-5 h-5 text-ctp-sapphire mb-3"></i>
+                <div class="text-ctp-text text-sm font-semibold font-display">NATS</div>
+                <div class="text-ctp-subtext0 text-xs mt-1 font-mono leading-relaxed">request/reply · sub-ms latency</div>
+                <div class="mt-3 flex items-center gap-1 text-ctp-overlay0 text-xs group-hover:text-ctp-sapphire transition-colors">
+                    <span>explore</span><i data-lucide="arrow-right" class="w-3 h-3"></i>
+                </div>
+            </a>
 
-        <a href="/ws" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-yellow rounded-xl p-4 transition-all text-left">
-            <i data-lucide="plug" class="w-5 h-5 text-ctp-yellow mb-2"></i>
-            <div class="text-ctp-text text-sm font-semibold font-display">WebSocket</div>
-            <div class="text-ctp-subtext0 text-xs mt-1 font-mono">chat · hub pattern · gorilla/ws</div>
-        </a>
+            <a href="/ws" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-yellow rounded-xl p-4 transition-all">
+                <i data-lucide="plug" class="w-5 h-5 text-ctp-yellow mb-3"></i>
+                <div class="text-ctp-text text-sm font-semibold font-display">WebSocket</div>
+                <div class="text-ctp-subtext0 text-xs mt-1 font-mono leading-relaxed">chat · hub pattern · gorilla/ws</div>
+                <div class="mt-3 flex items-center gap-1 text-ctp-overlay0 text-xs group-hover:text-ctp-yellow transition-colors">
+                    <span>explore</span><i data-lucide="arrow-right" class="w-3 h-3"></i>
+                </div>
+            </a>
 
-        <a href="/kafka" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-peach rounded-xl p-4 transition-all text-left">
-            <i data-lucide="mail" class="w-5 h-5 text-ctp-peach mb-2"></i>
-            <div class="text-ctp-text text-sm font-semibold font-display">Kafka</div>
-            <div class="text-ctp-subtext0 text-xs mt-1 font-mono">produce · consume · sarama</div>
-        </a>
+            <a href="/kafka" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-peach rounded-xl p-4 transition-all">
+                <i data-lucide="mail" class="w-5 h-5 text-ctp-peach mb-3"></i>
+                <div class="text-ctp-text text-sm font-semibold font-display">Kafka</div>
+                <div class="text-ctp-subtext0 text-xs mt-1 font-mono leading-relaxed">produce · consume · sarama</div>
+                <div class="mt-3 flex items-center gap-1 text-ctp-overlay0 text-xs group-hover:text-ctp-peach transition-colors">
+                    <span>explore</span><i data-lucide="arrow-right" class="w-3 h-3"></i>
+                </div>
+            </a>
 
-        <a href="/firehose" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-pink rounded-xl p-4 transition-all text-left">
-            <i data-lucide="flame" class="w-5 h-5 text-ctp-pink mb-2"></i>
-            <div class="text-ctp-text text-sm font-semibold font-display">Firehose</div>
-            <div class="text-ctp-subtext0 text-xs mt-1 font-mono">all events · real-time</div>
-        </a>
+            <a href="/firehose" class="group bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-pink rounded-xl p-4 transition-all">
+                <i data-lucide="flame" class="w-5 h-5 text-ctp-pink mb-3"></i>
+                <div class="text-ctp-text text-sm font-semibold font-display">Firehose</div>
+                <div class="text-ctp-subtext0 text-xs mt-1 font-mono leading-relaxed">all events · real-time</div>
+                <div class="mt-3 flex items-center gap-1 text-ctp-overlay0 text-xs group-hover:text-ctp-pink transition-colors">
+                    <span>explore</span><i data-lucide="arrow-right" class="w-3 h-3"></i>
+                </div>
+            </a>
 
+        </div>
     </div>
 
-    <!-- Services -->
-    <div class="flex gap-6 text-xs text-ctp-overlay0 font-mono">
-        <span class="flex items-center gap-1">
-            <i data-lucide="circle-dot" class="w-3 h-3 text-ctp-green"></i>
-            gateway <span class="text-ctp-surface2 ml-1">:8080</span>
-        </span>
-        <span class="flex items-center gap-1">
-            <i data-lucide="circle-dot" class="w-3 h-3 text-ctp-surface2"></i>
-            notifier <span class="text-ctp-surface2 ml-1">:8081</span>
-        </span>
-        <span class="flex items-center gap-1">
-            <i data-lucide="circle-dot" class="w-3 h-3 text-ctp-surface2"></i>
-            processor <span class="text-ctp-surface2 ml-1">:8082</span>
-        </span>
+    <!-- Architecture -->
+    <div class="w-full max-w-3xl">
+        <h2 class="text-ctp-overlay0 text-xs uppercase tracking-widest font-mono mb-4 flex items-center gap-2">
+            <i data-lucide="network" class="w-3.5 h-3.5"></i> Architecture
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+
+            <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-2 h-2 rounded-full bg-ctp-green"></div>
+                    <span class="text-ctp-text text-sm font-semibold font-display">gateway</span>
+                    <span class="ml-auto text-ctp-overlay0 text-xs font-mono">:8080</span>
+                </div>
+                <ul class="flex flex-col gap-1.5">
+                    <li class="flex items-center gap-2 text-xs text-ctp-subtext0 font-mono">
+                        <i data-lucide="layout-template" class="w-3 h-3 text-ctp-overlay1 shrink-0"></i> HTMX templates
+                    </li>
+                    <li class="flex items-center gap-2 text-xs text-ctp-subtext0 font-mono">
+                        <i data-lucide="plug" class="w-3 h-3 text-ctp-overlay1 shrink-0"></i> WebSocket hub
+                    </li>
+                    <li class="flex items-center gap-2 text-xs text-ctp-subtext0 font-mono">
+                        <i data-lucide="radio" class="w-3 h-3 text-ctp-overlay1 shrink-0"></i> NATS publish
+                    </li>
+                    <li class="flex items-center gap-2 text-xs text-ctp-subtext0 font-mono">
+                        <i data-lucide="server" class="w-3 h-3 text-ctp-overlay1 shrink-0"></i> Redis pub/sub
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-2 h-2 rounded-full bg-ctp-surface2"></div>
+                    <span class="text-ctp-text text-sm font-semibold font-display">notifier</span>
+                    <span class="ml-auto text-ctp-overlay0 text-xs font-mono">:8081</span>
+                </div>
+                <ul class="flex flex-col gap-1.5">
+                    <li class="flex items-center gap-2 text-xs text-ctp-subtext0 font-mono">
+                        <i data-lucide="radio" class="w-3 h-3 text-ctp-overlay1 shrink-0"></i> NATS subscribe
+                    </li>
+                    <li class="flex items-center gap-2 text-xs text-ctp-subtext0 font-mono">
+                        <i data-lucide="server" class="w-3 h-3 text-ctp-overlay1 shrink-0"></i> Redis relay
+                    </li>
+                    <li class="flex items-center gap-2 text-xs text-ctp-subtext0 font-mono">
+                        <i data-lucide="arrow-right" class="w-3 h-3 text-ctp-overlay1 shrink-0"></i> Forward to gateway
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-2 h-2 rounded-full bg-ctp-surface2"></div>
+                    <span class="text-ctp-text text-sm font-semibold font-display">processor</span>
+                    <span class="ml-auto text-ctp-overlay0 text-xs font-mono">:8082</span>
+                </div>
+                <ul class="flex flex-col gap-1.5">
+                    <li class="flex items-center gap-2 text-xs text-ctp-subtext0 font-mono">
+                        <i data-lucide="mail" class="w-3 h-3 text-ctp-overlay1 shrink-0"></i> Kafka consume
+                    </li>
+                    <li class="flex items-center gap-2 text-xs text-ctp-subtext0 font-mono">
+                        <i data-lucide="database" class="w-3 h-3 text-ctp-overlay1 shrink-0"></i> Postgres write
+                    </li>
+                    <li class="flex items-center gap-2 text-xs text-ctp-subtext0 font-mono">
+                        <i data-lucide="server" class="w-3 h-3 text-ctp-overlay1 shrink-0"></i> Redis cache
+                    </li>
+                    <li class="flex items-center gap-2 text-xs text-ctp-subtext0 font-mono">
+                        <i data-lucide="radio" class="w-3 h-3 text-ctp-overlay1 shrink-0"></i> NATS emit
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Stack -->
+    <div class="w-full max-w-3xl pb-4">
+        <h2 class="text-ctp-overlay0 text-xs uppercase tracking-widest font-mono mb-4 flex items-center gap-2">
+            <i data-lucide="package" class="w-3.5 h-3.5"></i> Stack
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+
+            <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl px-4 py-3 flex items-center gap-3">
+                <i data-lucide="code-2" class="w-4 h-4 text-ctp-sapphire shrink-0"></i>
+                <div>
+                    <div class="text-ctp-text text-xs font-semibold">Go 1.25</div>
+                    <div class="text-ctp-overlay0 text-xs font-mono">language</div>
+                </div>
+            </div>
+
+            <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl px-4 py-3 flex items-center gap-3">
+                <i data-lucide="layout-template" class="w-4 h-4 text-ctp-peach shrink-0"></i>
+                <div>
+                    <div class="text-ctp-text text-xs font-semibold">HTMX 2.0</div>
+                    <div class="text-ctp-overlay0 text-xs font-mono">frontend</div>
+                </div>
+            </div>
+
+            <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl px-4 py-3 flex items-center gap-3">
+                <i data-lucide="wind" class="w-4 h-4 text-ctp-sky shrink-0"></i>
+                <div>
+                    <div class="text-ctp-text text-xs font-semibold">Tailwind 4</div>
+                    <div class="text-ctp-overlay0 text-xs font-mono">styles</div>
+                </div>
+            </div>
+
+            <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl px-4 py-3 flex items-center gap-3">
+                <i data-lucide="database" class="w-4 h-4 text-ctp-green shrink-0"></i>
+                <div>
+                    <div class="text-ctp-text text-xs font-semibold">pgx/v5</div>
+                    <div class="text-ctp-overlay0 text-xs font-mono">postgres</div>
+                </div>
+            </div>
+
+            <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl px-4 py-3 flex items-center gap-3">
+                <i data-lucide="server" class="w-4 h-4 text-ctp-red shrink-0"></i>
+                <div>
+                    <div class="text-ctp-text text-xs font-semibold">go-redis</div>
+                    <div class="text-ctp-overlay0 text-xs font-mono">redis</div>
+                </div>
+            </div>
+
+            <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl px-4 py-3 flex items-center gap-3">
+                <i data-lucide="radio" class="w-4 h-4 text-ctp-sapphire shrink-0"></i>
+                <div>
+                    <div class="text-ctp-text text-xs font-semibold">nats.go</div>
+                    <div class="text-ctp-overlay0 text-xs font-mono">messaging</div>
+                </div>
+            </div>
+
+            <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl px-4 py-3 flex items-center gap-3">
+                <i data-lucide="mail" class="w-4 h-4 text-ctp-peach shrink-0"></i>
+                <div>
+                    <div class="text-ctp-text text-xs font-semibold">sarama</div>
+                    <div class="text-ctp-overlay0 text-xs font-mono">kafka</div>
+                </div>
+            </div>
+
+            <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl px-4 py-3 flex items-center gap-3">
+                <i data-lucide="plug" class="w-4 h-4 text-ctp-yellow shrink-0"></i>
+                <div>
+                    <div class="text-ctp-text text-xs font-semibold">gorilla/ws</div>
+                    <div class="text-ctp-overlay0 text-xs font-mono">websocket</div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
 </div>
