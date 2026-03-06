@@ -58,23 +58,57 @@
     ::-webkit-scrollbar       { width: 8px; }
     ::-webkit-scrollbar-track { background: #181825; }
     ::-webkit-scrollbar-thumb { background: linear-gradient(to bottom, #cba6f7, #f38ba8); border-radius: 4px; }
+
+    @keyframes nav-underline {
+        from { transform: scaleX(0); transform-origin: left; }
+        to   { transform: scaleX(1); transform-origin: left; }
+    }
+    .nav-active-underline {
+        animation: nav-underline 0.25s ease-out forwards;
+    }
   </style>
 </head>
 
 <body class="bg-ctp-base text-ctp-text font-sans flex flex-col min-h-screen">
 
     <!-- Sticky navbar -->
-    <nav class="sticky top-0 z-50 bg-ctp-mantle border-b border-ctp-surface1 px-6 py-3 flex items-center gap-1">
-        <a href="/" class="flex items-center gap-2 text-ctp-mauve font-display font-bold text-base tracking-widest mr-6">
-            <i data-lucide="zap" class="w-4 h-4"></i>
-            switchboard
-        </a>
-        <a href="/postgres" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-green    hover:bg-ctp-surface0 transition-colors text-sm"><i data-lucide="database" class="w-3.5 h-3.5"></i> Postgres</a>
-        <a href="/redis" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-red      hover:bg-ctp-surface0 transition-colors text-sm"><i data-lucide="server" class="w-3.5 h-3.5"></i> Redis</a>
-        <a href="/nats" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-sapphire  hover:bg-ctp-surface0 transition-colors text-sm"><i data-lucide="radio" class="w-3.5 h-3.5"></i> NATS</a>
-        <a href="/ws" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-yellow   hover:bg-ctp-surface0 transition-colors text-sm"><i data-lucide="plug" class="w-3.5 h-3.5"></i> WebSocket</a>
-        <a href="/kafka" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-peach    hover:bg-ctp-surface0 transition-colors text-sm"><i data-lucide="mail" class="w-3.5 h-3.5"></i> Kafka</a>
-        <a href="/firehose" class="flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-pink     hover:bg-ctp-surface0 transition-colors text-sm"><i data-lucide="flame" class="w-3.5 h-3.5"></i> Firehose</a>
+    <nav class="sticky top-0 z-50 bg-ctp-mantle border-b border-ctp-surface1">
+        <div class="max-w-6xl w-full mx-auto px-6 py-3 flex items-center">
+            <a href="/" class="flex items-center gap-2 text-ctp-mauve font-display font-bold text-base tracking-widest mr-6">
+                <i data-lucide="zap" class="w-4 h-4"></i>
+                switchboard
+            </a>
+        
+            <a href="/postgres" class="nav-link relative flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-green hover:bg-ctp-surface0 transition-colors text-sm">
+                <i data-lucide="database" class="w-3.5 h-3.5"></i> Postgres
+                <span class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-ctp-mauve rounded-full scale-x-0 origin-left"></span>
+            </a>
+        
+            <a href="/redis" class="nav-link relative flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0 transition-colors text-sm">
+                <i data-lucide="server" class="w-3.5 h-3.5"></i> Redis
+                <span class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-ctp-mauve rounded-full scale-x-0 origin-left"></span>
+            </a>
+        
+            <a href="/nats" class="nav-link relative flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-sapphire hover:bg-ctp-surface0 transition-colors text-sm">
+                <i data-lucide="radio" class="w-3.5 h-3.5"></i> NATS
+                <span class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-ctp-mauve rounded-full scale-x-0 origin-left"></span>
+            </a>
+        
+            <a href="/ws" class="nav-link relative flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-yellow hover:bg-ctp-surface0 transition-colors text-sm">
+                <i data-lucide="plug" class="w-3.5 h-3.5"></i> WebSocket
+                <span class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-ctp-mauve rounded-full scale-x-0 origin-left"></span>
+            </a>
+        
+            <a href="/kafka" class="nav-link relative flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-peach hover:bg-ctp-surface0 transition-colors text-sm">
+                <i data-lucide="mail" class="w-3.5 h-3.5"></i> Kafka
+                <span class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-ctp-mauve rounded-full scale-x-0 origin-left"></span>
+            </a>
+        
+            <a href="/firehose" class="nav-link relative flex items-center gap-1.5 px-3 py-1.5 rounded text-ctp-subtext0 hover:text-ctp-pink hover:bg-ctp-surface0 transition-colors text-sm">
+                <i data-lucide="flame" class="w-3.5 h-3.5"></i> Firehose
+                <span class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-ctp-mauve rounded-full scale-x-0 origin-left"></span>
+            </a>
+        </div>
     </nav>
 
     <!-- Main -->
@@ -164,6 +198,30 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        // Detecta la ruta activa y activa el underline con animación
+        ( function () {
+            const path = window.location.pathname;
+            const links = document.querySelectorAll( ".nav-link" );
+
+            links.forEach( link => {
+                const href = link.getAttribute( "href" );
+                // Match exacto o prefijo (ej: /postgres/something)
+                const isActive = path === href || ( href !== "/" && path.startsWith( href ) );
+
+                if ( isActive ) {
+                    const indicator = link.querySelector( ".nav-indicator" );
+                    // Quitar scale-x-0, agregar animación
+                    indicator.classList.remove( "scale-x-0" );
+                    indicator.classList.add( "nav-active-underline" );
+                    // El texto también toma el color mauve
+                    link.classList.add( "text-ctp-mauve" );
+                    link.classList.remove( "text-ctp-subtext0" );
+                }
+            } );
+        } )();
+    </script>
 
     <script>
         lucide.createIcons();
