@@ -6,23 +6,30 @@ import (
 	"syscall"
 
 	"switchboard/internal/config"
+	natsclient "switchboard/internal/messaging/nats"
 	"switchboard/services/notifier"
 )
 
 func main() {
 	cfg, err := config.Load("notifier")
 	if err != nil {
-		os.Stderr.WriteString("error cargando config: " + err.Error() + "\n")
+		os.Stderr.WriteString("error loading config: " + err.Error() + "\n")
 		os.Exit(1)
 	}
 
 	log := config.InitLogger(cfg.Env, cfg.Service)
 
-	srv := notifier.NewServer(cfg, log)
+	nc, err := natsclient.NewConn(cfg.NATS, log)
+	if err != nil {
+		log.Fatal().Err(err).Msg("error connecting nats")
+	}
+	defer nc.Close()
+
+	srv := notifier.NewServer(cfg, log, nc)
 
 	go func() {
 		if err := srv.Start(); err != nil {
-			log.Fatal().Err(err).Msg("servidor caído")
+			log.Fatal().Err(err).Msg("server down")
 		}
 	}()
 
@@ -30,6 +37,6 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	log.Info().Msg("apagando servidor...")
+	log.Info().Msg("shutting down...")
 	srv.Stop()
 }
