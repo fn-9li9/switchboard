@@ -1,0 +1,97 @@
+{{define "me_content"}}
+<div class="flex flex-col gap-6">
+
+    <div>
+        <h1 class="font-display font-bold text-lg text-ctp-text">Security</h1>
+        <p class="text-ctp-overlay0 text-sm font-mono mt-0.5">Password and account access</p>
+    </div>
+
+    {{if .Flash}}
+    {{$ok := eq .FlashType "success"}}
+    <div class="{{if $ok}}bg-ctp-green/10 border-ctp-green/30 text-ctp-green{{else}}bg-ctp-red/10 border-ctp-red/30 text-ctp-red{{end}} border text-sm rounded-lg px-4 py-3 flex items-center gap-2">
+        <i data-lucide="{{if $ok}}check-circle-2{{else}}circle-x{{end}}" class="w-4 h-4 shrink-0"></i>
+        {{if eq .Flash "password_changed"}}Password changed. Other sessions have been signed out.
+        {{else if eq .Flash "wrong_password"}}Current password is incorrect.
+        {{else if eq .Flash "mismatch"}}New passwords do not match.
+        {{else if eq .Flash "too_short"}}Password must be at least 8 characters.
+        {{else if eq .Flash "no_password"}}Your account uses Google sign-in and has no password set.
+        {{else if eq .Flash "confirm_mismatch"}}Email confirmation does not match.
+        {{else}}Something went wrong. Please try again.{{end}}
+    </div>
+    {{end}}
+
+    <!-- Change password -->
+    <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-6 flex flex-col gap-4">
+        <div>
+            <h2 class="text-sm font-semibold text-ctp-text">Change password</h2>
+            <p class="text-xs font-mono text-ctp-overlay0 mt-0.5">All other active sessions will be signed out.</p>
+        </div>
+
+        <form method="POST" action="/me/security/password" class="flex flex-col gap-3">
+            <div class="relative flex items-center">
+                <i data-lucide="lock" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
+                <input type="password" name="current_password" id="cur-pw" placeholder=" " required class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-4 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
+                <label for="cur-pw" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
+                      transition-all duration-150 origin-left
+                      peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
+                      peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
+                    Current password
+                </label>
+            </div>
+            <div class="relative flex items-center">
+                <i data-lucide="lock-keyhole" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
+                <input type="password" name="new_password" id="new-pw" placeholder=" " required minlength="8" class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-4 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
+                <label for="new-pw" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
+                      transition-all duration-150 origin-left
+                      peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
+                      peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
+                    New password
+                </label>
+            </div>
+            <div class="relative flex items-center">
+                <i data-lucide="lock-keyhole" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
+                <input type="password" name="confirm_password" id="conf-pw" placeholder=" " required class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-4 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
+                <label for="conf-pw" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
+                      transition-all duration-150 origin-left
+                      peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
+                      peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
+                    Confirm new password
+                </label>
+            </div>
+            <div class="flex justify-end">
+                <button type="submit" class="bg-ctp-blue text-ctp-base font-semibold rounded-lg px-5 py-2 text-sm hover:opacity-90 transition-opacity">
+                    Update password
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Delete account -->
+    <div class="bg-ctp-mantle border border-ctp-red/20 rounded-xl p-6 flex flex-col gap-4">
+        <div>
+            <h2 class="text-sm font-semibold text-ctp-red">Delete account</h2>
+            <p class="text-xs font-mono text-ctp-overlay0 mt-0.5">
+                This will deactivate your account permanently. Type your email to confirm.
+            </p>
+        </div>
+        <form method="POST" action="/me/security/delete" class="flex flex-col gap-3" onsubmit="return confirm('Are you sure? This cannot be undone.')">
+            <div class="relative flex items-center">
+                <i data-lucide="mail" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
+                <input type="email" name="confirm" id="del-confirm" placeholder=" " required class="peer w-full bg-transparent border border-ctp-red/30 focus:border-ctp-red rounded-lg pl-9 pr-4 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
+                <label for="del-confirm" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
+                      transition-all duration-150 origin-left
+                      peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-red
+                      peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
+                    Type {{.User.Email}} to confirm
+                </label>
+            </div>
+            <div class="flex justify-end">
+                <button type="submit" class="bg-ctp-red/10 text-ctp-red border border-ctp-red/30 hover:bg-ctp-red/20 font-semibold rounded-lg px-5 py-2 text-sm transition-colors">
+                    Delete account
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+{{end}}
