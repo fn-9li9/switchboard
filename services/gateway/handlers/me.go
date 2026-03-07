@@ -17,19 +17,21 @@ import (
 
 	"switchboard/internal/auth"
 	"switchboard/internal/config"
+	"switchboard/internal/mailer"
 	authstore "switchboard/internal/store/auth"
 )
 
 type MeHandler struct {
-	pool *pgxpool.Pool
-	log  zerolog.Logger
-	cfg  *config.Config
-	sm   *auth.SessionManager
-	enc  *auth.Encryptor
+	pool   *pgxpool.Pool
+	log    zerolog.Logger
+	cfg    *config.Config
+	sm     *auth.SessionManager
+	enc    *auth.Encryptor
+	mailer *mailer.Mailer
 }
 
-func NewMeHandler(pool *pgxpool.Pool, log zerolog.Logger, cfg *config.Config, sm *auth.SessionManager, enc *auth.Encryptor) *MeHandler {
-	return &MeHandler{pool: pool, log: log, cfg: cfg, sm: sm, enc: enc}
+func NewMeHandler(pool *pgxpool.Pool, log zerolog.Logger, cfg *config.Config, sm *auth.SessionManager, enc *auth.Encryptor, m *mailer.Mailer) *MeHandler {
+	return &MeHandler{pool: pool, log: log, cfg: cfg, sm: sm, enc: enc, mailer: m}
 }
 
 // SecurityData es el struct que se pasa a security.html
@@ -381,6 +383,13 @@ func (h *MeHandler) MFASetupConfirm(navUser *NavUser) http.HandlerFunc {
 		// Activar MFA
 		authstore.EnableMFA(ctx, h.pool, userID)
 
+		// Notificar por email
+		go func() {
+			if err := h.mailer.SendMFAEnabledEmail(navUser.Email, time.Now()); err != nil {
+				h.log.Error().Err(err).Msg("mfa/setup: send enabled email")
+			}
+		}()
+
 		// Generar 10 backup codes
 		backupCodes, plainCodes, err := h.generateBackupCodes(ctx, userID)
 		if err != nil {
@@ -511,6 +520,13 @@ func (h *MeHandler) MFADisable(navUser *NavUser) http.HandlerFunc {
 
 		authstore.DisableMFA(ctx, h.pool, userID)
 		authstore.DeleteBackupCodes(ctx, h.pool, userID)
+
+		// Notificar por email
+		go func() {
+			if err := h.mailer.SendMFADisabledEmail(navUser.Email, time.Now()); err != nil {
+				h.log.Error().Err(err).Msg("mfa/disable: send disabled email")
+			}
+		}()
 
 		ip := auth.ClientIP(r)
 		ua := auth.UserAgent(r)
