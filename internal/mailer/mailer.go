@@ -25,13 +25,33 @@ func (m *Mailer) SendVerificationEmail(to, verifyURL string) error {
 	body := fmt.Sprintf(`
 <!DOCTYPE html>
 <html>
-<body style="font-family: monospace; background: #1e1e2e; color: #cdd6f4; padding: 32px;">
-  <h2 style="color: #cba6f7;">⚡ switchboard</h2>
-  <p>Click the link below to verify your email address:</p>
-  <p><a href="%s" style="color: #89b4fa;">%s</a></p>
-  <p style="color: #6c7086; font-size: 12px;">This link expires in 24 hours.</p>
-</body>
-</html>`, verifyURL, verifyURL)
+	<body style="font-family: monospace; color: #1e1e2e; padding: 32px; max-width: 480px; margin: 0 auto;">
+
+	<h2 style="color: #cba6f7; margin-bottom: 4px;">switchboard</h2>
+	<hr style="border: none; border-top: 1px solid #e0e0e0; margin-bottom: 24px;">
+
+	<p style="font-size: 15px; margin-bottom: 8px;">Hi,</p>
+	<p style="font-size: 14px; color: #444; margin-bottom: 24px;">
+		Thanks for signing up. Please verify your email address by clicking the button below.
+	</p>
+
+	<a href="%s" style="display: inline-block; background: #cba6f7; color: #1e1e2e; text-decoration: none;
+		font-weight: bold; padding: 12px 28px; border-radius: 8px; font-size: 14px;">
+		Verify Email
+	</a>
+
+	<p style="margin-top: 24px; font-size: 12px; color: #999;">
+		Or copy and paste this link into your browser:<br>
+		<a href="%s" style="color: #89b4fa;">%s</a>
+	</p>
+
+	<hr style="border: none; border-top: 1px solid #e0e0e0; margin-top: 32px;">
+	<p style="font-size: 11px; color: #aaa;">
+		This link expires in 24 hours. If you did not create an account, you can safely ignore this email.
+	</p>
+
+	</body>
+</html>`, verifyURL, verifyURL, verifyURL)
 
 	return m.send(to, subject, body)
 }
@@ -41,13 +61,33 @@ func (m *Mailer) SendPasswordResetEmail(to, resetURL string) error {
 	body := fmt.Sprintf(`
 <!DOCTYPE html>
 <html>
-<body style="font-family: monospace; background: #1e1e2e; color: #cdd6f4; padding: 32px;">
-  <h2 style="color: #cba6f7;">⚡ switchboard</h2>
-  <p>Click the link below to reset your password:</p>
-  <p><a href="%s" style="color: #89b4fa;">%s</a></p>
-  <p style="color: #6c7086; font-size: 12px;">This link expires in 1 hour. If you did not request this, ignore this email.</p>
-</body>
-</html>`, resetURL, resetURL)
+	<body style="font-family: monospace; color: #1e1e2e; padding: 32px; max-width: 480px; margin: 0 auto;">
+
+	<h2 style="color: #cba6f7; margin-bottom: 4px;">switchboard</h2>
+	<hr style="border: none; border-top: 1px solid #e0e0e0; margin-bottom: 24px;">
+
+	<p style="font-size: 15px; margin-bottom: 8px;">Hi,</p>
+	<p style="font-size: 14px; color: #444; margin-bottom: 24px;">
+		We received a request to reset your password. Click the button below to continue.
+	</p>
+
+	<a href="%s" style="display: inline-block; background: #cba6f7; color: #1e1e2e; text-decoration: none;
+		font-weight: bold; padding: 12px 28px; border-radius: 8px; font-size: 14px;">
+		Reset Password
+	</a>
+
+	<p style="margin-top: 24px; font-size: 12px; color: #999;">
+		Or copy and paste this link into your browser:<br>
+		<a href="%s" style="color: #89b4fa;">%s</a>
+	</p>
+
+	<hr style="border: none; border-top: 1px solid #e0e0e0; margin-top: 32px;">
+	<p style="font-size: 11px; color: #aaa;">
+		This link expires in 1 hour. If you did not request a password reset, you can safely ignore this email.
+	</p>
+
+	</body>
+</html>`, resetURL, resetURL, resetURL)
 
 	return m.send(to, subject, body)
 }
