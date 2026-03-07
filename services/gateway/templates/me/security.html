@@ -29,36 +29,76 @@
             <p class="text-xs font-mono text-ctp-overlay0 mt-0.5">All other active sessions will be signed out.</p>
         </div>
         <form method="POST" action="/me/security/password" class="flex flex-col gap-3">
+        
+            <!-- Current password -->
             <div class="relative flex items-center">
                 <i data-lucide="lock" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
-                <input type="password" name="current_password" id="cur-pw" placeholder=" " required class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-4 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
+                <input type="password" name="current_password" id="cur-pw" placeholder=" " required class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-10 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
                 <label for="cur-pw" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
-                      transition-all duration-150 origin-left
-                      peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
-                      peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
+                          transition-all duration-150 origin-left
+                          peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
+                          peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
                     Current password
                 </label>
+                <button type="button" onclick="togglePw('cur-pw', 'eye-cur')" class="absolute right-3 text-ctp-overlay0 hover:text-ctp-text transition-colors">
+                    <i id="eye-cur" data-lucide="eye" class="w-4 h-4"></i>
+                </button>
             </div>
+        
+            <!-- New password + strength -->
+            <div class="flex flex-col gap-1.5">
+                <div class="relative flex items-center">
+                    <i data-lucide="lock-keyhole" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
+                    <input type="password" name="new_password" id="chg-new-pw" placeholder=" " required minlength="8" oninput="checkStrength(this.value, 'chg')"
+                        class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-10 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
+                    <label for="chg-new-pw" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
+                            transition-all duration-150 origin-left
+                            peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
+                            peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
+                        New password
+                    </label>
+                    <button type="button" onclick="togglePw('chg-new-pw', 'eye-chg-new')" class="absolute right-3 text-ctp-overlay0 hover:text-ctp-text transition-colors">
+                        <i id="eye-chg-new" data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <!-- Strength bars -->
+                <div id="chg-strength-bars" class="hidden gap-1 h-1">
+                    <div id="chg-bar-0" class="flex-1 rounded-full transition-all duration-300" style="background:#45475a"></div>
+                    <div id="chg-bar-1" class="flex-1 rounded-full transition-all duration-300" style="background:#45475a"></div>
+                    <div id="chg-bar-2" class="flex-1 rounded-full transition-all duration-300" style="background:#45475a"></div>
+                    <div id="chg-bar-3" class="flex-1 rounded-full transition-all duration-300" style="background:#45475a"></div>
+                    <div id="chg-bar-4" class="flex-1 rounded-full transition-all duration-300" style="background:#45475a"></div>
+                </div>
+                <div id="chg-strength-row" class="hidden items-center gap-2">
+                    <span id="chg-strength-label" class="text-xs font-mono italic"></span>
+                </div>
+                <!-- Requirements -->
+                <div class="px-1 flex flex-col gap-1">
+                    <p class="text-xs font-mono text-ctp-overlay0">Password must contain at least:</p>
+                    <ul class="flex flex-col gap-0.5">
+                        <li class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0"><span class="text-ctp-mauve">•</span> 8 characters</li>
+                        <li class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0"><span class="text-ctp-mauve">•</span> one lowercase letter</li>
+                        <li class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0"><span class="text-ctp-mauve">•</span> one uppercase letter</li>
+                        <li class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0"><span class="text-ctp-mauve">•</span> one number</li>
+                        <li class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0"><span class="text-ctp-mauve">•</span> one symbol <span class="text-ctp-overlay0">(!@#$%^&*)</span></li>
+                    </ul>
+                </div>
+            </div>
+        
+            <!-- Confirm password -->
             <div class="relative flex items-center">
                 <i data-lucide="lock-keyhole" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
-                <input type="password" name="new_password" id="new-pw" placeholder=" " required minlength="8" class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-4 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
-                <label for="new-pw" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
-                      transition-all duration-150 origin-left
-                      peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
-                      peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
-                    New password
-                </label>
-            </div>
-            <div class="relative flex items-center">
-                <i data-lucide="lock-keyhole" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
-                <input type="password" name="confirm_password" id="conf-pw" placeholder=" " required class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-4 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
-                <label for="conf-pw" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
-                      transition-all duration-150 origin-left
-                      peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
-                      peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
+                <input type="password" name="confirm_password" id="chg-conf-pw" placeholder=" " required oninput="checkMatch('chg-new-pw', 'chg-conf-pw', 'chg-match-icon')"
+                    class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-10 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
+                <label for="chg-conf-pw" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
+                          transition-all duration-150 origin-left
+                          peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
+                          peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
                     Confirm new password
                 </label>
+                <span id="chg-match-icon" class="absolute right-3 text-sm hidden"></span>
             </div>
+        
             <div class="flex justify-end">
                 <button type="submit" class="bg-ctp-blue text-ctp-base font-semibold rounded-lg px-5 py-2 text-sm hover:opacity-90 transition-opacity">
                     Update password
@@ -86,28 +126,62 @@
             <p class="text-xs font-mono text-ctp-overlay0 mt-0.5">You will still be able to sign in with Google.</p>
         </div>
         <form method="POST" action="/me/security/password" class="flex flex-col gap-3">
-            <!-- Campo oculto para indicar que es un set, no un change -->
             <input type="hidden" name="is_set" value="1">
-            <div class="relative flex items-center">
-                <i data-lucide="lock-keyhole" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
-                <input type="password" name="new_password" id="new-pw" placeholder=" " required minlength="8" class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-4 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
-                <label for="new-pw" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
-                      transition-all duration-150 origin-left
-                      peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
-                      peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
-                    New password
-                </label>
+        
+            <!-- New password + strength -->
+            <div class="flex flex-col gap-1.5">
+                <div class="relative flex items-center">
+                    <i data-lucide="lock-keyhole" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
+                    <input type="password" name="new_password" id="set-new-pw" placeholder=" " required minlength="8" oninput="checkStrength(this.value, 'set')"
+                        class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-10 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
+                    <label for="set-new-pw" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
+                            transition-all duration-150 origin-left
+                            peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
+                            peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
+                        New password
+                    </label>
+                    <button type="button" onclick="togglePw('set-new-pw', 'eye-set-new')" class="absolute right-3 text-ctp-overlay0 hover:text-ctp-text transition-colors">
+                        <i id="eye-set-new" data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <!-- Strength bars -->
+                <div id="set-strength-bars" class="hidden gap-1 h-1">
+                    <div id="set-bar-0" class="flex-1 rounded-full transition-all duration-300" style="background:#45475a"></div>
+                    <div id="set-bar-1" class="flex-1 rounded-full transition-all duration-300" style="background:#45475a"></div>
+                    <div id="set-bar-2" class="flex-1 rounded-full transition-all duration-300" style="background:#45475a"></div>
+                    <div id="set-bar-3" class="flex-1 rounded-full transition-all duration-300" style="background:#45475a"></div>
+                    <div id="set-bar-4" class="flex-1 rounded-full transition-all duration-300" style="background:#45475a"></div>
+                </div>
+                <div id="set-strength-row" class="hidden items-center gap-2">
+                    <span id="set-strength-label" class="text-xs font-mono"></span>
+                </div>
+                <!-- Requirements -->
+                <div class="px-1 flex flex-col gap-1">
+                    <p class="text-xs font-mono text-ctp-overlay0">Password must contain at least:</p>
+                    <ul class="flex flex-col gap-0.5">
+                        <li class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0"><span class="text-ctp-mauve">•</span> 8 characters</li>
+                        <li class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0"><span class="text-ctp-mauve">•</span> one lowercase letter</li>
+                        <li class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0"><span class="text-ctp-mauve">•</span> one uppercase letter</li>
+                        <li class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0"><span class="text-ctp-mauve">•</span> one number</li>
+                        <li class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0"><span class="text-ctp-mauve">•</span> one symbol <span class="text-ctp-overlay0">(!@#$%^&*)</span></li>
+                    </ul>
+                </div>
             </div>
+        
+            <!-- Confirm password -->
             <div class="relative flex items-center">
                 <i data-lucide="lock-keyhole" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
-                <input type="password" name="confirm_password" id="conf-pw" placeholder=" " required class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-4 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
-                <label for="conf-pw" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
-                      transition-all duration-150 origin-left
-                      peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
-                      peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
+                <input type="password" name="confirm_password" id="set-conf-pw" placeholder=" " required oninput="checkMatch('set-new-pw', 'set-conf-pw', 'set-match-icon')"
+                    class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-10 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
+                <label for="set-conf-pw" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
+                          transition-all duration-150 origin-left
+                          peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
+                          peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
                     Confirm password
                 </label>
+                <span id="set-match-icon" class="absolute right-3 text-sm hidden"></span>
             </div>
+        
             <div class="flex justify-end">
                 <button type="submit" class="bg-ctp-mauve text-ctp-base font-semibold rounded-lg px-5 py-2 text-sm hover:opacity-90 transition-opacity">
                     Set password
@@ -144,6 +218,63 @@
             </div>
         </form>
     </div>
+
+    <script>
+        const COLORS = { 1: "#f38ba8", 2: "#fab387", 3: "#f9e2af", 4: "#94e2d5", 5: "#a6e3a1" };
+        const LABELS = { 1: "Weak", 2: "Fair", 3: "Good", 4: "Strong", 5: "Excellent" };
+
+        function checkStrength ( value, prefix ) {
+            const barsEl = document.getElementById( prefix + "-strength-bars" );
+            const rowEl = document.getElementById( prefix + "-strength-row" );
+            if ( !barsEl ) return;
+
+            if ( value.length === 0 ) {
+                barsEl.classList.add( "hidden" ); barsEl.classList.remove( "flex" );
+                rowEl.classList.add( "hidden" ); rowEl.classList.remove( "flex" );
+                return;
+            }
+            barsEl.classList.remove( "hidden" ); barsEl.classList.add( "flex" );
+            rowEl.classList.remove( "hidden" ); rowEl.classList.add( "flex" );
+
+            const checks = [
+                v => v.length >= 8,
+                v => /[a-z]/.test( v ),
+                v => /[A-Z]/.test( v ),
+                v => /[0-9]/.test( v ),
+                v => /[!@#$%^&*]/.test( v ),
+            ];
+            const score = Math.max( 1, checks.filter( fn => fn( value ) ).length );
+
+            for ( let i = 0; i < 5; i++ ) {
+                const bar = document.getElementById( prefix + "-bar-" + i );
+                if ( bar ) bar.style.background = i < score ? COLORS[ score ] : "#45475a";
+            }
+
+            const lbl = document.getElementById( prefix + "-strength-label" );
+            if ( lbl ) { lbl.textContent = LABELS[ score ]; lbl.style.color = COLORS[ score ]; }
+        }
+
+        function checkMatch ( pwId, confirmId, iconId ) {
+            const pw = document.getElementById( pwId )?.value || "";
+            const confirm = document.getElementById( confirmId )?.value || "";
+            const icon = document.getElementById( iconId );
+            if ( !icon ) return;
+            if ( confirm.length === 0 ) { icon.classList.add( "hidden" ); return; }
+            icon.classList.remove( "hidden" );
+            icon.textContent = pw === confirm ? "✓" : "✕";
+            icon.style.color = pw === confirm ? "#a6e3a1" : "#f38ba8";
+        }
+
+        function togglePw ( inputId, iconId ) {
+            const input = document.getElementById( inputId );
+            const icon = document.getElementById( iconId );
+            if ( !input || !icon ) return;
+            const isHidden = input.type === "password";
+            input.type = isHidden ? "text" : "password";
+            icon.setAttribute( "data-lucide", isHidden ? "eye-off" : "eye" );
+            lucide.createIcons();
+        }
+    </script>
 
 </div>
 {{end}}
