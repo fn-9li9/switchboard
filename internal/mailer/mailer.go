@@ -22,75 +22,73 @@ func New(cfg config.SMTPConfig, log zerolog.Logger) *Mailer {
 }
 
 func (m *Mailer) SendVerificationEmail(to, verifyURL string) error {
-	subject := "Verify your switchboard account"
-	body := fmt.Sprintf(`
-<!DOCTYPE html>
+	body := fmt.Sprintf(`<!DOCTYPE html>
 <html>
-	<body style="font-family: monospace; color: #1e1e2e; padding: 32px; max-width: 480px; margin: 0 auto;">
-
-	<h2 style="color: #cba6f7; margin-bottom: 4px;">switchboard</h2>
-	<hr style="border: none; border-top: 1px solid #e0e0e0; margin-bottom: 24px;">
-
-	<p style="font-size: 15px; margin-bottom: 8px;">Hi,</p>
-	<p style="font-size: 14px; color: #444; margin-bottom: 24px;">
-		Thanks for signing up. Please verify your email address by clicking the button below.
-	</p>
-
-	<a href="%s" style="display: inline-block; background: #cba6f7; color: #1e1e2e; text-decoration: none;
-		font-weight: bold; padding: 12px 28px; border-radius: 8px; font-size: 14px;">
-		Verify Email
-	</a>
-
-	<p style="margin-top: 24px; font-size: 12px; color: #999;">
-		Or copy and paste this link into your browser:<br>
-		<a href="%s" style="color: #89b4fa;">%s</a>
-	</p>
-
-	<hr style="border: none; border-top: 1px solid #e0e0e0; margin-top: 32px;">
-	<p style="font-size: 11px; color: #aaa;">
-		This link expires in 24 hours. If you did not create an account, you can safely ignore this email.
-	</p>
-
-	</body>
+<head><meta charset="utf-8"></head>
+<body style="background:#1e1e2e;color:#cdd6f4;font-family:'Albert Sans',sans-serif;padding:40px 20px;margin:0">
+  <div style="max-width:480px;margin:0 auto;background:#181825;border:1px solid #313244;border-radius:16px;padding:32px">
+    <div style="text-align:center;margin-bottom:24px">
+      <h1 style="color:#cba6f7;font-size:20px;margin:12px 0 4px">Verify your email</h1>
+      <p style="color:#6c7086;font-size:13px;margin:0;font-family:monospace">switchboard</p>
+    </div>
+    <p style="color:#cdd6f4;font-size:14px;line-height:1.6;margin:0 0 20px">
+      Thanks for signing up. Please verify your email address to activate your account.
+    </p>
+    <div style="text-align:center;margin:24px 0">
+      <a href="%s"
+         style="display:inline-block;background:#cba6f7;color:#1e1e2e;text-decoration:none;
+                font-weight:700;padding:13px 32px;border-radius:10px;font-size:14px;font-family:monospace">
+        Verify Email →
+      </a>
+    </div>
+    <div style="background:#1e1e2e;border:1px solid #313244;border-radius:10px;padding:14px 16px;margin:20px 0">
+      <p style="color:#45475a;font-size:11px;font-family:monospace;margin:0 0 6px">or copy this link:</p>
+      <a href="%s" style="color:#89b4fa;font-size:11px;font-family:monospace;word-break:break-all">%s</a>
+    </div>
+    <p style="color:#45475a;font-size:11px;font-family:monospace;line-height:1.6;margin:16px 0 0;text-align:center">
+      This link expires in 24 hours.<br>
+      If you did not create an account, you can safely ignore this email.
+    </p>
+  </div>
+</body>
 </html>`, verifyURL, verifyURL, verifyURL)
 
-	return m.send(to, subject, body)
+	return m.send(to, "Verify your switchboard account", body)
 }
 
 func (m *Mailer) SendPasswordResetEmail(to, resetURL string) error {
-	subject := "Reset your switchboard password"
-	body := fmt.Sprintf(`
-<!DOCTYPE html>
+	body := fmt.Sprintf(`<!DOCTYPE html>
 <html>
-	<body style="font-family: monospace; color: #1e1e2e; padding: 32px; max-width: 480px; margin: 0 auto;">
-
-	<h2 style="color: #cba6f7; margin-bottom: 4px;">switchboard</h2>
-	<hr style="border: none; border-top: 1px solid #e0e0e0; margin-bottom: 24px;">
-
-	<p style="font-size: 15px; margin-bottom: 8px;">Hi,</p>
-	<p style="font-size: 14px; color: #444; margin-bottom: 24px;">
-		We received a request to reset your password. Click the button below to continue.
-	</p>
-
-	<a href="%s" style="display: inline-block; background: #cba6f7; color: #1e1e2e; text-decoration: none;
-		font-weight: bold; padding: 12px 28px; border-radius: 8px; font-size: 14px;">
-		Reset Password
-	</a>
-
-	<p style="margin-top: 24px; font-size: 12px; color: #999;">
-		Or copy and paste this link into your browser:<br>
-		<a href="%s" style="color: #89b4fa;">%s</a>
-	</p>
-
-	<hr style="border: none; border-top: 1px solid #e0e0e0; margin-top: 32px;">
-	<p style="font-size: 11px; color: #aaa;">
-		This link expires in 1 hour. If you did not request a password reset, you can safely ignore this email.
-	</p>
-
-	</body>
+<head><meta charset="utf-8"></head>
+<body style="background:#1e1e2e;color:#cdd6f4;font-family:'Albert Sans',sans-serif;padding:40px 20px;margin:0">
+  <div style="max-width:480px;margin:0 auto;background:#181825;border:1px solid #313244;border-radius:16px;padding:32px">
+    <div style="text-align:center;margin-bottom:24px">
+      <h1 style="color:#89b4fa;font-size:20px;margin:12px 0 4px">Reset your password</h1>
+      <p style="color:#6c7086;font-size:13px;margin:0;font-family:monospace">switchboard</p>
+    </div>
+    <p style="color:#cdd6f4;font-size:14px;line-height:1.6;margin:0 0 20px">
+      We received a request to reset your password. Click the button below to choose a new one.
+    </p>
+    <div style="text-align:center;margin:24px 0">
+      <a href="%s"
+         style="display:inline-block;background:#89b4fa;color:#1e1e2e;text-decoration:none;
+                font-weight:700;padding:13px 32px;border-radius:10px;font-size:14px;font-family:monospace">
+        Reset Password →
+      </a>
+    </div>
+    <div style="background:#1e1e2e;border:1px solid #313244;border-radius:10px;padding:14px 16px;margin:20px 0">
+      <p style="color:#45475a;font-size:11px;font-family:monospace;margin:0 0 6px">or copy this link:</p>
+      <a href="%s" style="color:#89b4fa;font-size:11px;font-family:monospace;word-break:break-all">%s</a>
+    </div>
+    <p style="color:#45475a;font-size:11px;font-family:monospace;line-height:1.6;margin:16px 0 0;text-align:center">
+      This link expires in 1 hour.<br>
+      If you did not request this, you can safely ignore this email.
+    </p>
+  </div>
+</body>
 </html>`, resetURL, resetURL, resetURL)
 
-	return m.send(to, subject, body)
+	return m.send(to, "Reset your switchboard password", body)
 }
 
 func (m *Mailer) SendMFAEnabledEmail(to string, t time.Time) error {
