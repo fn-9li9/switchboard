@@ -59,7 +59,7 @@ func NewServer(cfg *config.Config, log zerolog.Logger, pool *pgxpool.Pool, rdb *
 	s.turnstile = auth.NewTurnstileVerifier(cfg.Turnstile.SecretKey)
 	s.mailer = mailer.New(cfg.SMTP, log)
 	s.authMiddleware = auth.NewMiddleware(sm, pool, log)
-	s.meH = handlers.NewMeHandler(pool, log, cfg, sm, enc)
+	s.meH = handlers.NewMeHandler(pool, log, cfg, sm, enc, s.mailer)
 
 	mux := http.NewServeMux()
 	s.registerRoutes(mux)
