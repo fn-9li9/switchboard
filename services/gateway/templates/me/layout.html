@@ -8,25 +8,25 @@
             <p class="text-ctp-overlay0 text-[10px] font-mono uppercase tracking-widest px-3 mb-2">Account</p>
 
             <a href="/me/profile" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
-                {{if eq .ActiveTab " profile"}}bg-ctp-surface0 text-ctp-mauve{{else}}text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text{{end}}">
+                {{if eq .ActiveTab "profile"}}bg-ctp-surface0 text-ctp-mauve font-medium{{else}}text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text{{end}}">
                 <i data-lucide="user-round" class="w-4 h-4 shrink-0"></i>
                 Profile
             </a>
 
             <a href="/me/security" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
-                {{if eq .ActiveTab " security"}}bg-ctp-surface0 text-ctp-blue{{else}}text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text{{end}}">
+                {{if eq .ActiveTab "security"}}bg-ctp-surface0 text-ctp-blue font-medium{{else}}text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text{{end}}">
                 <i data-lucide="shield" class="w-4 h-4 shrink-0"></i>
                 Security
             </a>
 
             <a href="/me/sessions" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
-                {{if eq .ActiveTab " sessions"}}bg-ctp-surface0 text-ctp-sapphire{{else}}text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text{{end}}">
+                {{if eq .ActiveTab "sessions"}}bg-ctp-surface0 text-ctp-sapphire font-medium{{else}}text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text{{end}}">
                 <i data-lucide="monitor" class="w-4 h-4 shrink-0"></i>
                 Sessions
             </a>
 
             <a href="/me/mfa" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
-                {{if eq .ActiveTab " mfa"}}bg-ctp-surface0 text-ctp-green{{else}}text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text{{end}}">
+                {{if eq .ActiveTab "mfa"}}bg-ctp-surface0 text-ctp-green font-medium{{else}}text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text{{end}}">
                 <i data-lucide="scan-face" class="w-4 h-4 shrink-0"></i>
                 Two-factor auth
                 {{if .User.MFAEnabled}}
@@ -39,8 +39,13 @@
             {{if eq .User.Role "root"}}
             <div class="my-3 border-t border-ctp-surface1"></div>
             <p class="text-ctp-overlay0 text-[10px] font-mono uppercase tracking-widest px-3 mb-2">Admin</p>
+            <a href="/me/users" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
+                {{if eq .ActiveTab "admin-users"}}bg-ctp-surface0 text-ctp-peach font-medium{{else}}text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text{{end}}">
+                <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+                Users
+            </a>
             <a href="/me/settings" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
-                {{if eq .ActiveTab " admin"}}bg-ctp-surface0 text-ctp-peach{{else}}text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text{{end}}">
+                {{if eq .ActiveTab "admin-settings"}}bg-ctp-surface0 text-ctp-peach font-medium{{else}}text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text{{end}}">
                 <i data-lucide="settings-2" class="w-4 h-4 shrink-0"></i>
                 Settings
             </a>
