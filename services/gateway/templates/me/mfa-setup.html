@@ -1,0 +1,70 @@
+{{define "me_content"}}
+<div class="flex flex-col gap-6">
+
+    <div>
+        <h1 class="font-display font-bold text-lg text-ctp-text">Set up two-factor auth</h1>
+        <p class="text-ctp-overlay0 text-sm font-mono mt-0.5">Scan the QR code with your authenticator app</p>
+    </div>
+
+    {{with .Data}}
+    {{if .Error}}
+    <div class="bg-ctp-red/10 border border-ctp-red/30 text-ctp-red text-sm rounded-lg px-4 py-3 flex items-center gap-2">
+        <i data-lucide="circle-x" class="w-4 h-4 shrink-0"></i>{{.Error}}
+    </div>
+    {{end}}
+
+    <!-- Step 1 — Scan -->
+    <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-6 flex flex-col gap-5">
+        <div class="flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-ctp-mauve text-ctp-base text-[10px] font-bold flex items-center justify-center shrink-0">1</span>
+            <h2 class="text-sm font-semibold text-ctp-text">Scan with your authenticator app</h2>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center gap-6">
+            <!-- QR -->
+            <div class="p-3 bg-white rounded-xl shrink-0">
+                <img src="data:image/png;base64,{{.QRCode}}" class="w-40 h-40" alt="QR Code" />
+            </div>
+            <div class="flex flex-col gap-3">
+                <p class="text-xs font-mono text-ctp-subtext0 leading-relaxed">
+                    Open <span class="text-ctp-text">Authy</span>, <span class="text-ctp-text">Google Authenticator</span>,
+                    or any TOTP app and scan the QR code.
+                </p>
+                <div class="flex flex-col gap-1">
+                    <p class="text-[10px] font-mono text-ctp-overlay0 uppercase tracking-widest">Or enter manually:</p>
+                    <code class="text-xs font-mono text-ctp-mauve bg-ctp-surface0 rounded-lg px-3 py-2 break-all select-all">
+            {{.Secret}}
+          </code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2 — Confirm -->
+    <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-6 flex flex-col gap-4">
+        <div class="flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-ctp-mauve text-ctp-base text-[10px] font-bold flex items-center justify-center shrink-0">2</span>
+            <h2 class="text-sm font-semibold text-ctp-text">Enter the 6-digit code to confirm</h2>
+        </div>
+
+        <form method="POST" action="/me/mfa/setup" class="flex flex-col gap-3">
+            <div class="relative flex items-center">
+                <i data-lucide="shield-check" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
+                <input type="text" name="code" id="code" placeholder="000000" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="one-time-code" required class="w-full bg-transparent border border-ctp-surface1 focus:border-ctp-green
+                      rounded-lg pl-9 pr-4 py-2.5 text-ctp-text text-sm outline-none transition-colors
+                      tracking-[0.4em] font-mono text-center h-12" />
+            </div>
+            <div class="flex gap-3 justify-end">
+                <a href="/me/mfa" class="px-4 py-2 text-sm font-mono text-ctp-overlay0 hover:text-ctp-text transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-ctp-green text-ctp-base font-semibold rounded-lg px-5 py-2 text-sm hover:opacity-90 transition-opacity">
+                    Enable two-factor auth
+                </button>
+            </div>
+        </form>
+    </div>
+    {{end}}
+
+</div>
+{{end}}

@@ -1,0 +1,86 @@
+{{define "me_content"}}
+<div class="flex flex-col gap-6">
+
+    <div>
+        <h1 class="font-display font-bold text-lg text-ctp-text">Backup codes</h1>
+        <p class="text-ctp-overlay0 text-sm font-mono mt-0.5">Use these if you lose access to your authenticator app</p>
+    </div>
+
+    {{with .Data}}
+    {{if .FromSetup}}
+
+    <!-- Éxito setup -->
+    <div class="bg-ctp-green/10 border border-ctp-green/30 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="check-circle-2" class="w-5 h-5 text-ctp-green shrink-0 mt-0.5"></i>
+        <div>
+            <p class="text-sm font-semibold text-ctp-green">Two-factor auth enabled</p>
+            <p class="text-xs font-mono text-ctp-subtext0 mt-0.5 leading-relaxed">
+                Save these backup codes in a secure place. Each code can only be used once.
+                <span class="text-ctp-peach font-semibold">They will not be shown again.</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Códigos -->
+    <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-6 flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-ctp-text">Your backup codes</h2>
+            <a href="/me/mfa/backup-codes/download" class="flex items-center gap-1.5 text-xs font-mono text-ctp-sapphire hover:opacity-80 transition-opacity
+                border border-ctp-sapphire/30 hover:border-ctp-sapphire/60 bg-ctp-sapphire/5 rounded-lg px-3 py-1.5">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                Download .txt
+            </a>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+            {{range .Codes}}
+            <code class="font-mono text-sm text-ctp-mauve bg-ctp-surface0 rounded-lg px-4 py-2.5 text-center tracking-widest border border-ctp-surface1">
+        {{.}}
+      </code>
+            {{end}}
+        </div>
+
+        <p class="text-[10px] font-mono text-ctp-overlay0 leading-relaxed">
+            Store these codes somewhere safe — password manager, printed paper, encrypted file.
+            If you lose your authenticator and these codes, you will be locked out of your account.
+        </p>
+    </div>
+
+    <a href="/me/mfa" class="flex items-center justify-center gap-2 text-sm font-mono text-ctp-mauve hover:opacity-80 transition-opacity">
+        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        Done — go to MFA settings
+    </a>
+
+    {{else}}
+
+    <!-- Acceso directo sin setup reciente -->
+    <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-6 flex flex-col gap-4">
+        <div class="flex items-start gap-3">
+            <i data-lucide="shield-alert" class="w-5 h-5 text-ctp-peach shrink-0 mt-0.5"></i>
+            <div class="flex flex-col gap-1">
+                <p class="text-sm font-semibold text-ctp-text">Backup codes are not displayed here</p>
+                <p class="text-xs font-mono text-ctp-subtext0 leading-relaxed">
+                    For security, backup codes are only shown once — immediately after enabling MFA.
+                    You can download your current unused codes below.
+                </p>
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <a href="/me/mfa/backup-codes/download" class="flex items-center gap-1.5 text-xs font-mono text-ctp-sapphire hover:opacity-80 transition-opacity
+                border border-ctp-sapphire/30 bg-ctp-sapphire/5 rounded-lg px-3 py-1.5">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                Download unused codes (.txt)
+            </a>
+            <a href="/me/mfa" class="flex items-center gap-1.5 text-xs font-mono text-ctp-overlay0 hover:text-ctp-text transition-colors
+                border border-ctp-surface1 rounded-lg px-3 py-1.5">
+                <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                Back to MFA
+            </a>
+        </div>
+    </div>
+
+    {{end}}
+    {{end}}
+
+</div>
+{{end}}
