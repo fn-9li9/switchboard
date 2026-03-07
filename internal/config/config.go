@@ -94,32 +94,6 @@ func (c *Config) AppURL() string {
 
 // ── Loader ─────────────────────────────────────────────────────
 
-// Load lee .env + configs/<service>.yaml y mapea env vars con prefijo
-// del servicio (GATEWAY_*, PROCESSOR_*, NOTIFIER_*).
-//
-// Precedencia (mayor a menor):
-//  1. Variables de entorno del sistema
-//  2. Variables del .env
-//  3. configs/<service>.yaml
-//  4. Defaults del código
-//
-// Mapeo de env vars (prefijo = servicio en mayúsculas):
-//
-//	GATEWAY_AUTH_SESSION_SECRET   → cfg.Auth.SessionSecret
-//	GATEWAY_AUTH_ENCRYPTION_KEY   → cfg.Auth.EncryptionKey
-//	GATEWAY_GOOGLE_CLIENT_ID      → cfg.Google.ClientID
-//	GATEWAY_GOOGLE_CLIENT_SECRET  → cfg.Google.ClientSecret
-//	GATEWAY_GOOGLE_REDIRECT_URI   → cfg.Google.RedirectURI
-//	GATEWAY_TURNSTILE_SECRET_KEY  → cfg.Turnstile.SecretKey
-//	GATEWAY_TURNSTILE_SITE_KEY    → cfg.Turnstile.SiteKey
-//	GATEWAY_SMTP_HOST             → cfg.SMTP.Host
-//	GATEWAY_SMTP_PORT             → cfg.SMTP.Port
-//	GATEWAY_SMTP_USER             → cfg.SMTP.User
-//	GATEWAY_SMTP_PASSWORD         → cfg.SMTP.Password
-//	GATEWAY_SMTP_FROM             → cfg.SMTP.From
-//	GATEWAY_APP_URL               → cfg.App.URL
-//	GATEWAY_POSTGRES_DSN          → cfg.Postgres.DSN
-//	GATEWAY_REDIS_PASSWORD        → cfg.Redis.Password
 func Load(service string) (*Config, error) {
 	v := viper.New()
 
