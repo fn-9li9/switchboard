@@ -1,0 +1,19 @@
+{{define "content"}}
+<div class="bg-ctp-mantle border border-ctp-surface1 rounded-2xl p-8 flex flex-col items-center gap-5 text-center">
+    <div class="p-3 bg-ctp-sapphire/10 rounded-full border border-ctp-sapphire/30">
+        <svg class="w-8 h-8 text-ctp-sapphire" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
+        </svg>
+    </div>
+    <div>
+        <h1 class="font-display font-bold text-xl text-ctp-text">Check your email</h1>
+        <p class="text-ctp-overlay0 text-sm mt-2 leading-relaxed">
+            We sent a verification link to<br>
+            <span class="text-ctp-mauve font-mono text-xs">{{.Email}}</span>
+        </p>
+    </div>
+    <p class="text-ctp-overlay0 text-xs font-mono">The link expires in 24 hours.</p>
+    <a href="/auth/signin" class="text-ctp-overlay0 hover:text-ctp-mauve text-xs transition-colors">Back to login</a>
+</div>
+{{end}}

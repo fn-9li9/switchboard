@@ -1,0 +1,31 @@
+{{define "content"}}
+<div class="bg-ctp-mantle border border-ctp-surface1 rounded-2xl p-8 flex flex-col items-center gap-5 text-center">
+    {{if .Success}}
+    <div class="p-3 bg-ctp-green/10 rounded-full border border-ctp-green/30">
+        <svg class="w-8 h-8 text-ctp-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12" />
+        </svg>
+    </div>
+    <div>
+        <h1 class="font-display font-bold text-xl text-ctp-text">Email verified</h1>
+        <p class="text-ctp-overlay0 text-sm mt-1">Your account is ready.</p>
+    </div>
+    <a href="/auth/signin" class="bg-ctp-mauve text-ctp-base font-semibold rounded-lg px-6 py-2.5 text-sm hover:opacity-90 transition-opacity">
+        Sign in
+    </a>
+    {{else}}
+    <div class="p-3 bg-ctp-red/10 rounded-full border border-ctp-red/30">
+        <svg class="w-8 h-8 text-ctp-red" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="15" y1="9" x2="9" y2="15" />
+            <line x1="9" y1="9" x2="15" y2="15" />
+        </svg>
+    </div>
+    <div>
+        <h1 class="font-display font-bold text-xl text-ctp-text">Verification failed</h1>
+        <p class="text-ctp-red text-sm mt-1">{{.Error}}</p>
+    </div>
+    <a href="/auth/signup" class="text-ctp-mauve hover:underline text-sm">Back to register</a>
+    {{end}}
+</div>
+{{end}}
