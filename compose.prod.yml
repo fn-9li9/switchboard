@@ -119,12 +119,32 @@ services:
       - "${GATEWAY_PORT:-8080}:8080"
     environment:
       APP_ENV: prod
+      # ── Server ─────────────────────────────────────────────────
       GATEWAY_SERVER_PORT: 8080
+      # ── Datastores ─────────────────────────────────────────────
       GATEWAY_POSTGRES_DSN: postgres://${POSTGRES_USER:-switchboard}:${POSTGRES_PASSWORD:-switchboard}@postgres:5432/${POSTGRES_DB:-switchboard}?sslmode=disable
       GATEWAY_REDIS_ADDR: redis:6379
       GATEWAY_REDIS_PASSWORD: ${REDIS_PASSWORD:-switchboard}
       GATEWAY_NATS_URL: nats://nats:4222
       GATEWAY_KAFKA_BROKERS: kafka:29092
+      # ── Auth ───────────────────────────────────────────────────
+      GATEWAY_AUTH_SESSION_SECRET: ${GATEWAY_AUTH_SESSION_SECRET}
+      GATEWAY_AUTH_ENCRYPTION_KEY: ${GATEWAY_AUTH_ENCRYPTION_KEY}
+      # ── Google OAuth ───────────────────────────────────────────
+      GATEWAY_GOOGLE_CLIENT_ID: ${GATEWAY_GOOGLE_CLIENT_ID}
+      GATEWAY_GOOGLE_CLIENT_SECRET: ${GATEWAY_GOOGLE_CLIENT_SECRET}
+      GATEWAY_GOOGLE_REDIRECT_URI: ${GATEWAY_GOOGLE_REDIRECT_URI}
+      # ── Turnstile ──────────────────────────────────────────────
+      GATEWAY_TURNSTILE_SECRET_KEY: ${GATEWAY_TURNSTILE_SECRET_KEY}
+      GATEWAY_TURNSTILE_SITE_KEY: ${GATEWAY_TURNSTILE_SITE_KEY}
+      # ── SMTP ───────────────────────────────────────────────────
+      GATEWAY_SMTP_HOST: ${GATEWAY_SMTP_HOST}
+      GATEWAY_SMTP_PORT: ${GATEWAY_SMTP_PORT:-587}
+      GATEWAY_SMTP_USER: ${GATEWAY_SMTP_USER}
+      GATEWAY_SMTP_PASSWORD: ${GATEWAY_SMTP_PASSWORD}
+      GATEWAY_SMTP_FROM: ${GATEWAY_SMTP_FROM}
+      # ── App ────────────────────────────────────────────────────
+      GATEWAY_APP_URL: ${GATEWAY_APP_URL}
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health || exit 1"]
       interval: 10s
