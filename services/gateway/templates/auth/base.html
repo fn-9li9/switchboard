@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <style type="text/tailwindcss">
+        @theme {
+      --color-ctp-mauve:    #cba6f7;
+      --color-ctp-red:      #f38ba8;
+      --color-ctp-peach:    #fab387;
+      --color-ctp-green:    #a6e3a1;
+      --color-ctp-teal:     #94e2d5;
+      --color-ctp-sapphire: #74c7ec;
+      --color-ctp-blue:     #89b4fa;
+      --color-ctp-yellow:   #f9e2af;
+      --color-ctp-text:     #cdd6f4;
+      --color-ctp-subtext1: #bac2de;
+      --color-ctp-subtext0: #a6adc8;
+      --color-ctp-overlay1: #7f849c;
+      --color-ctp-overlay0: #6c7086;
+      --color-ctp-surface2: #585b70;
+      --color-ctp-surface1: #45475a;
+      --color-ctp-surface0: #313244;
+      --color-ctp-base:     #1e1e2e;
+      --color-ctp-mantle:   #181825;
+      --color-ctp-crust:    #11111b;
+      --font-sans:    "Albert Sans", sans-serif;
+      --font-display: "Poppins", sans-serif;
+      --font-mono:    "JetBrains Mono", monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    /* Input float label */
+    .float-label input:focus ~ label,
+    .float-label input:not(:placeholder-shown) ~ label {
+      transform: translateY(-1.6rem) scale(0.78);
+      color: #cba6f7;
+    }
+    .float-label label {
+      transition: transform 0.15s ease, color 0.15s ease;
+      transform-origin: left;
+    }
+
+    /* Password strength bar */
+    .strength-bar { transition: width 0.3s ease, background-color 0.3s ease; }
+  </style>
+</head>
+
+<body class="bg-ctp-base text-ctp-text font-sans min-h-screen flex items-center justify-center px-4 py-8">
+    <div class="w-full max-w-md">
+
+        <!-- Logo -->
+        <div class="flex flex-col items-center gap-2 mb-8">
+            <a href="/" class="flex items-center gap-2 text-ctp-mauve">
+                <i data-lucide="zap" class="w-12 h-12"></i>
+            </a>
+            <span class="font-display font-bold text-ctp-mauve tracking-widest text-lg">switchboard</span>
+        </div>
+
+        {{template "content" .}}
+
+    </div>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>
