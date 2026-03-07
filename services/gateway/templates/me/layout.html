@@ -1,0 +1,58 @@
+{{define "content"}}
+<div class="flex gap-8 max-w-5xl mx-auto w-full">
+
+    <!-- Sidebar -->
+    <aside class="w-52 shrink-0">
+        <nav class="flex flex-col gap-0.5 sticky top-24">
+
+            <p class="text-ctp-overlay0 text-[10px] font-mono uppercase tracking-widest px-3 mb-2">Account</p>
+
+            <a href="/me/profile" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
+                {{if eq .ActiveTab " profile"}}bg-ctp-surface0 text-ctp-mauve{{else}}text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text{{end}}">
+                <i data-lucide="user-round" class="w-4 h-4 shrink-0"></i>
+                Profile
+            </a>
+
+            <a href="/me/security" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
+                {{if eq .ActiveTab " security"}}bg-ctp-surface0 text-ctp-blue{{else}}text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text{{end}}">
+                <i data-lucide="shield" class="w-4 h-4 shrink-0"></i>
+                Security
+            </a>
+
+            <a href="/me/sessions" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
+                {{if eq .ActiveTab " sessions"}}bg-ctp-surface0 text-ctp-sapphire{{else}}text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text{{end}}">
+                <i data-lucide="monitor" class="w-4 h-4 shrink-0"></i>
+                Sessions
+            </a>
+
+            <a href="/me/mfa" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
+                {{if eq .ActiveTab " mfa"}}bg-ctp-surface0 text-ctp-green{{else}}text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text{{end}}">
+                <i data-lucide="scan-face" class="w-4 h-4 shrink-0"></i>
+                Two-factor auth
+                {{if .User.MFAEnabled}}
+                <span class="ml-auto text-[9px] font-mono text-ctp-green bg-ctp-green/10 border border-ctp-green/20 rounded px-1.5 py-0.5">on</span>
+                {{else}}
+                <span class="ml-auto text-[9px] font-mono text-ctp-overlay0 bg-ctp-surface1 rounded px-1.5 py-0.5">off</span>
+                {{end}}
+            </a>
+
+            {{if eq .User.Role "root"}}
+            <div class="my-3 border-t border-ctp-surface1"></div>
+            <p class="text-ctp-overlay0 text-[10px] font-mono uppercase tracking-widest px-3 mb-2">Admin</p>
+            <a href="/admin/settings" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors
+                {{if eq .ActiveTab " admin"}}bg-ctp-surface0 text-ctp-peach{{else}}text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text{{end}}">
+                <i data-lucide="settings-2" class="w-4 h-4 shrink-0"></i>
+                Settings
+            </a>
+            {{end}}
+
+        </nav>
+    </aside>
+
+    <!-- Content -->
+    <div class="flex-1 min-w-0">
+        {{template "me_content" .}}
+    </div>
+
+</div>
+{{end}}
