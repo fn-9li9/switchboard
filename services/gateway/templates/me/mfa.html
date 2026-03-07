@@ -10,7 +10,10 @@
     {{$ok := eq .FlashType "success"}}
     <div class="{{if $ok}}bg-ctp-green/10 border-ctp-green/30 text-ctp-green{{else}}bg-ctp-red/10 border-ctp-red/30 text-ctp-red{{end}} border text-sm rounded-lg px-4 py-3 flex items-center gap-2">
         <i data-lucide="{{if $ok}}check-circle-2{{else}}circle-x{{end}}" class="w-4 h-4 shrink-0"></i>
-        {{.Flash}}
+        {{if eq .Flash "mfa_enabled"}}Two-factor auth has been enabled.
+        {{else if eq .Flash "mfa_disabled"}}Two-factor auth has been disabled.
+        {{else if eq .Flash "invalid_code"}}Invalid code. Please try again.
+        {{else}}{{.Flash}}{{end}}
     </div>
     {{end}}
 
@@ -27,18 +30,45 @@
                 {{if .User.MFAEnabled}}Your account is protected with TOTP.{{else}}Enable TOTP via an authenticator app.{{end}}
             </p>
         </div>
+
         {{if .User.MFAEnabled}}
-        <a href="/me/mfa/disable" class="text-xs font-mono text-ctp-red hover:text-ctp-red/70 border border-ctp-red/20 hover:border-ctp-red/40 rounded-lg px-3 py-1.5 transition-colors">
-            Disable
-        </a>
+        <form method="POST" action="/me/mfa/disable" class="flex items-center gap-2" onsubmit="return document.getElementById('disable-code').value.length === 6">
+            <input type="text" id="disable-code" name="code" placeholder="000000" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" required class="w-28 bg-transparent border border-ctp-surface1 focus:border-ctp-red
+                      rounded-lg px-3 py-1.5 text-ctp-text text-xs font-mono outline-none
+                      tracking-widest text-center transition-colors" />
+            <button type="submit" class="text-xs font-mono text-ctp-red hover:text-ctp-red/70 border border-ctp-red/20
+                       hover:border-ctp-red/40 rounded-lg px-3 py-1.5 transition-colors">
+                Disable
+            </button>
+        </form>
         {{else}}
-        <a href="/me/mfa/setup" class="text-xs font-mono text-ctp-green hover:text-ctp-green/70 border border-ctp-green/20 hover:border-ctp-green/40 bg-ctp-green/5 hover:bg-ctp-green/10 rounded-lg px-3 py-1.5 transition-colors">
+        <a href="/me/mfa/setup" class="text-xs font-mono text-ctp-green hover:text-ctp-green/70 border border-ctp-green/20
+                hover:border-ctp-green/40 bg-ctp-green/5 hover:bg-ctp-green/10 rounded-lg px-3 py-1.5 transition-colors">
             Enable
         </a>
         {{end}}
     </div>
 
-    <!-- Info -->
+    <!-- Backup codes link — solo si MFA está activo -->
+    {{if .User.MFAEnabled}}
+    <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-5 flex items-center gap-3">
+        <div class="p-2 rounded-lg bg-ctp-surface0 shrink-0">
+            <i data-lucide="key-round" class="w-4 h-4 text-ctp-sapphire"></i>
+        </div>
+        <div class="flex-1">
+            <p class="text-sm font-semibold text-ctp-text">Backup codes</p>
+            <p class="text-xs font-mono text-ctp-overlay0 mt-0.5">Download your unused backup codes for account recovery.</p>
+        </div>
+        <a href="/me/mfa/backup-codes" class="flex items-center gap-1.5 text-xs font-mono text-ctp-sapphire hover:opacity-80 transition-opacity
+              border border-ctp-sapphire/30 bg-ctp-sapphire/5 rounded-lg px-3 py-1.5 shrink-0">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            View &amp; download
+        </a>
+    </div>
+    {{end}}
+
+    <!-- How it works — solo si MFA está desactivado -->
+    {{if not .User.MFAEnabled}}
     <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-6 flex flex-col gap-3">
         <h2 class="text-sm font-semibold text-ctp-text">How it works</h2>
         <ul class="flex flex-col gap-2">
@@ -60,6 +90,7 @@
             </li>
         </ul>
     </div>
+    {{end}}
 
 </div>
 {{end}}
