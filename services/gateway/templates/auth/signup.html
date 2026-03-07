@@ -1,0 +1,233 @@
+{{define "content"}}
+<div class="bg-ctp-mantle border border-ctp-surface1 rounded-2xl p-8 flex flex-col gap-5">
+
+    <div class="text-center">
+        <h1 class="font-display font-bold text-xl text-ctp-text">Create account</h1>
+        <p class="text-ctp-overlay0 text-sm mt-1 font-mono">Join switchboard</p>
+    </div>
+
+    {{if .Error}}
+    <div class="bg-ctp-red/10 border border-ctp-red/30 text-ctp-red text-sm rounded-lg px-4 py-3 flex items-center gap-2">
+        <i data-lucide="circle-x" class="w-4 h-4 shrink-0"></i>
+        <span>{{.Error}}</span>
+    </div>
+    {{end}}
+
+    <form method="POST" action="/auth/signup" class="flex flex-col gap-4">
+
+        <!-- First + Last name -->
+        <div class="grid grid-cols-2 gap-3">
+            <div class="relative flex items-center">
+                <i data-lucide="user" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
+                <input type="text" name="first_name" id="first-name" placeholder=" " class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-4 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
+                <label for="first-name" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
+                      transition-all duration-150 origin-left
+                      peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
+                      peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
+                    First name
+                </label>
+            </div>
+            <div class="relative flex items-center">
+                <i data-lucide="user" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
+                <input type="text" name="last_name" id="last-name" placeholder=" " class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-4 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
+                <label for="last-name" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
+                      transition-all duration-150 origin-left
+                      peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
+                      peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
+                    Last name
+                </label>
+            </div>
+        </div>
+
+        <!-- Email -->
+        <div class="relative flex items-center">
+            <i data-lucide="mail" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
+            <input type="email" name="email" id="signup-email" placeholder=" " value="{{.Email}}" required class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-4 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
+            <label for="signup-email" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
+                    transition-all duration-150 origin-left
+                    peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
+                    peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
+                Email
+            </label>
+        </div>
+
+        <!-- Password + strength + requirements -->
+        <div class="flex flex-col gap-2">
+            <div class="relative flex items-center">
+                <i data-lucide="lock" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
+                <input type="password" name="password" id="signup-password" placeholder=" " required oninput="checkStrength(this.value)" class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-10 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
+                <label for="signup-password" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
+                              transition-all duration-150 origin-left
+                              peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
+                              peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
+                    Password
+                </label>
+                <button type="button" onclick="togglePassword('signup-password','eye-signup')" class="absolute right-3 text-ctp-overlay0 hover:text-ctp-mauve transition-colors">
+                    <i id="eye-signup" data-lucide="eye" class="w-4 h-4"></i>
+                </button>
+            </div>
+        
+            <!-- Strength bars — ocultas hasta escribir -->
+            <div id="strength-bars" class="hidden gap-1 h-1">
+                <div id="bar-1" class="flex-1 rounded-full transition-all duration-300" style="background:#45475a"></div>
+                <div id="bar-2" class="flex-1 rounded-full transition-all duration-300" style="background:#45475a"></div>
+                <div id="bar-3" class="flex-1 rounded-full transition-all duration-300" style="background:#45475a"></div>
+                <div id="bar-4" class="flex-1 rounded-full transition-all duration-300" style="background:#45475a"></div>
+                <div id="bar-5" class="flex-1 rounded-full transition-all duration-300" style="background:#45475a"></div>
+            </div>
+        
+            <!-- Strength label — oculto hasta escribir -->
+            <div id="strength-row" class="hidden items-center justify-between">
+                <span id="strength-label" class="text-xs font-mono"></span>
+            </div>
+        
+            <!-- Requirements — informativo estático -->
+            <div class="px-1 flex flex-col gap-1">
+                <p class="text-xs font-mono text-ctp-overlay0 mb-0.5">Password must contain at least:</p>
+                <ul class="flex flex-col gap-0.5">
+                    <li class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0">
+                        <span class="text-ctp-mauve">•</span> 8 characters
+                    </li>
+                    <li class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0">
+                        <span class="text-ctp-mauve">•</span> one lowercase letter
+                    </li>
+                    <li class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0">
+                        <span class="text-ctp-mauve">•</span> one uppercase letter
+                    </li>
+                    <li class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0">
+                        <span class="text-ctp-mauve">•</span> one number
+                    </li>
+                    <li class="flex items-center gap-2 text-xs font-mono text-ctp-subtext0">
+                        <span class="text-ctp-mauve">•</span> one symbol <span class="text-ctp-overlay0">(!@#$%^&*)</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Confirm password -->
+        <div class="flex flex-col gap-1">
+            <div class="relative flex items-center">
+                <i data-lucide="lock" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
+                <input type="password" name="password_confirm" id="signup-confirm" placeholder=" " required oninput="checkMatch()" class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-10 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12"
+                    id_wrapper="confirm-wrapper" />
+                <label for="signup-confirm" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
+                      transition-all duration-150 origin-left
+                      peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
+                      peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
+                    Confirm password
+                </label>
+                <button type="button" onclick="togglePassword('signup-confirm','eye-confirm')" class="absolute right-3 text-ctp-overlay0 hover:text-ctp-mauve transition-colors">
+                    <i id="eye-confirm" data-lucide="eye" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <span id="match-msg" class="hidden text-xs font-mono px-1"></span>
+        </div>
+
+        <!-- Turnstile -->
+        <div class="flex justify-center">
+            <div class="cf-turnstile" data-sitekey="{{.SiteKey}}" data-theme="dark"></div>
+        </div>
+
+        <button type="submit" class="bg-ctp-mauve text-ctp-base font-semibold rounded-lg px-4 py-2.5 text-sm hover:opacity-90 transition-opacity">
+            Create account
+        </button>
+    </form>
+
+    <div class="flex items-center gap-3">
+        <div class="flex-1 h-px bg-ctp-surface1"></div>
+        <span class="text-ctp-overlay0 text-xs font-mono">or</span>
+        <div class="flex-1 h-px bg-ctp-surface1"></div>
+    </div>
+
+    <a href="/auth/google" class="flex items-center justify-center gap-3 bg-ctp-surface0 hover:bg-ctp-surface1 border border-ctp-surface1 hover:border-ctp-mauve rounded-lg px-4 py-2.5 text-sm transition-all">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+        </svg>
+        <span class="text-ctp-subtext0">Continue with Google</span>
+    </a>
+
+    <p class="text-center text-ctp-overlay0 text-xs">
+        Already have an account?
+        <a href="/auth/signin" class="text-ctp-mauve hover:underline">Sign in</a>
+    </p>
+</div>
+
+<script>
+    const COLORS = { 1: "#f38ba8", 2: "#fab387", 3: "#f9e2af", 4: "#94e2d5", 5: "#a6e3a1" };
+    const LABELS = { 1: "Weak", 2: "Fair", 3: "Good", 4: "Strong", 5: "Excellent" };
+    const BARS = [ 1, 2, 3, 4, 5 ].map( i => document.getElementById( "bar-" + i ) );
+
+    const REQS = [
+        { id: "req-length", test: v => v.length >= 8 },
+        { id: "req-lower", test: v => /[a-z]/.test( v ) },
+        { id: "req-upper", test: v => /[A-Z]/.test( v ) },
+        { id: "req-number", test: v => /[0-9]/.test( v ) },
+        { id: "req-symbol", test: v => /[!@#$%^&*]/.test( v ) },
+    ];
+
+    function checkStrength ( value ) {
+        const barsEl = document.getElementById( "strength-bars" );
+        const rowEl = document.getElementById( "strength-row" );
+
+        if ( value.length === 0 ) {
+            barsEl.classList.add( "hidden" ); barsEl.classList.remove( "flex" );
+            rowEl.classList.add( "hidden" ); rowEl.classList.remove( "flex" );
+            return;
+        }
+
+        barsEl.classList.remove( "hidden" ); barsEl.classList.add( "flex" );
+        rowEl.classList.remove( "hidden" ); rowEl.classList.add( "flex" );
+
+        const checks = [
+            v => v.length >= 8,
+            v => /[a-z]/.test( v ),
+            v => /[A-Z]/.test( v ),
+            v => /[0-9]/.test( v ),
+            v => /[!@#$%^&*]/.test( v ),
+        ];
+        const score = Math.max( 1, checks.filter( fn => fn( value ) ).length );
+
+        BARS.forEach( ( b, i ) => {
+            b.style.background = i < score ? COLORS[ score ] : "#45475a";
+        } );
+
+        const lbl = document.getElementById( "strength-label" );
+        lbl.textContent = LABELS[ score ];
+        lbl.style.color = COLORS[ score ];
+    }
+
+    function togglePassword ( inputId, iconId ) {
+        const input = document.getElementById( inputId );
+        const icon = document.getElementById( iconId );
+        input.type = input.type === "password" ? "text" : "password";
+        icon.setAttribute( "data-lucide", input.type === "password" ? "eye" : "eye-off" );
+        lucide.createIcons();
+    }
+
+    function checkMatch () {
+        const pw = document.getElementById( "signup-password" ).value;
+        const confirm = document.getElementById( "signup-confirm" ).value;
+        const msg = document.getElementById( "match-msg" );
+        const input = document.getElementById( "signup-confirm" );
+
+        if ( !confirm.length ) {
+            msg.classList.add( "hidden" );
+            input.style.borderColor = "";
+            return;
+        }
+        msg.classList.remove( "hidden" );
+        if ( pw === confirm ) {
+            msg.textContent = "✓ Passwords match";
+            msg.style.color = "#a6e3a1";
+            input.style.borderColor = "#a6e3a1";
+        } else {
+            msg.textContent = "✕ Passwords do not match";
+            msg.style.color = "#f38ba8";
+            input.style.borderColor = "#f38ba8";
+        }
+    }
+</script>
+{{end}}
