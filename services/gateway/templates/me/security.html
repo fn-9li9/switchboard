@@ -11,22 +11,23 @@
     <div class="{{if $ok}}bg-ctp-green/10 border-ctp-green/30 text-ctp-green{{else}}bg-ctp-red/10 border-ctp-red/30 text-ctp-red{{end}} border text-sm rounded-lg px-4 py-3 flex items-center gap-2">
         <i data-lucide="{{if $ok}}check-circle-2{{else}}circle-x{{end}}" class="w-4 h-4 shrink-0"></i>
         {{if eq .Flash "password_changed"}}Password changed. Other sessions have been signed out.
+        {{else if eq .Flash "password_set"}}Password set successfully.
         {{else if eq .Flash "wrong_password"}}Current password is incorrect.
-        {{else if eq .Flash "mismatch"}}New passwords do not match.
+        {{else if eq .Flash "mismatch"}}Passwords do not match.
         {{else if eq .Flash "too_short"}}Password must be at least 8 characters.
-        {{else if eq .Flash "no_password"}}Your account uses Google sign-in and has no password set.
         {{else if eq .Flash "confirm_mismatch"}}Email confirmation does not match.
         {{else}}Something went wrong. Please try again.{{end}}
     </div>
     {{end}}
 
-    <!-- Change password -->
+    {{with .Data}}{{with .HasPassword}}
+
+    <!-- Tiene password — mostrar cambio de contraseña -->
     <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-6 flex flex-col gap-4">
         <div>
             <h2 class="text-sm font-semibold text-ctp-text">Change password</h2>
             <p class="text-xs font-mono text-ctp-overlay0 mt-0.5">All other active sessions will be signed out.</p>
         </div>
-
         <form method="POST" action="/me/security/password" class="flex flex-col gap-3">
             <div class="relative flex items-center">
                 <i data-lucide="lock" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
@@ -66,7 +67,58 @@
         </form>
     </div>
 
-    <!-- Delete account -->
+    {{else}}
+
+    <!-- No tiene password — solo OAuth -->
+    <div class="bg-ctp-peach/10 border border-ctp-peach/30 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="triangle-alert" class="w-4 h-4 text-ctp-peach shrink-0 mt-0.5"></i>
+        <div class="flex flex-col gap-1">
+            <p class="text-sm font-semibold text-ctp-peach">No password set</p>
+            <p class="text-xs font-mono text-ctp-subtext0 leading-relaxed">
+                Your account was created via Google sign-in. Set a password to also be able to sign in with your email.
+            </p>
+        </div>
+    </div>
+
+    <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-6 flex flex-col gap-4">
+        <div>
+            <h2 class="text-sm font-semibold text-ctp-text">Set a password</h2>
+            <p class="text-xs font-mono text-ctp-overlay0 mt-0.5">You will still be able to sign in with Google.</p>
+        </div>
+        <form method="POST" action="/me/security/password" class="flex flex-col gap-3">
+            <!-- Campo oculto para indicar que es un set, no un change -->
+            <input type="hidden" name="is_set" value="1">
+            <div class="relative flex items-center">
+                <i data-lucide="lock-keyhole" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
+                <input type="password" name="new_password" id="new-pw" placeholder=" " required minlength="8" class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-4 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
+                <label for="new-pw" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
+                      transition-all duration-150 origin-left
+                      peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
+                      peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
+                    New password
+                </label>
+            </div>
+            <div class="relative flex items-center">
+                <i data-lucide="lock-keyhole" class="absolute left-3 w-4 h-4 text-ctp-overlay0 z-10 shrink-0"></i>
+                <input type="password" name="confirm_password" id="conf-pw" placeholder=" " required class="peer w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve rounded-lg pl-9 pr-4 pt-3 pb-2 text-ctp-text text-sm outline-none transition-colors h-12" />
+                <label for="conf-pw" class="absolute left-9 top-1/2 -translate-y-1/2 text-ctp-overlay0 text-sm pointer-events-none px-1 bg-ctp-mantle
+                      transition-all duration-150 origin-left
+                      peer-focus:top-0 peer-focus:scale-75 peer-focus:text-ctp-mauve
+                      peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:scale-75">
+                    Confirm password
+                </label>
+            </div>
+            <div class="flex justify-end">
+                <button type="submit" class="bg-ctp-mauve text-ctp-base font-semibold rounded-lg px-5 py-2 text-sm hover:opacity-90 transition-opacity">
+                    Set password
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {{end}}{{end}}
+
+    <!-- Delete account — siempre visible -->
     <div class="bg-ctp-mantle border border-ctp-red/20 rounded-xl p-6 flex flex-col gap-4">
         <div>
             <h2 class="text-sm font-semibold text-ctp-red">Delete account</h2>
