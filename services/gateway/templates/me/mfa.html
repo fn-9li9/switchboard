@@ -1,0 +1,65 @@
+{{define "me_content"}}
+<div class="flex flex-col gap-6">
+
+    <div>
+        <h1 class="font-display font-bold text-lg text-ctp-text">Two-factor authentication</h1>
+        <p class="text-ctp-overlay0 text-sm font-mono mt-0.5">Add an extra layer of security to your account</p>
+    </div>
+
+    {{if .Flash}}
+    {{$ok := eq .FlashType "success"}}
+    <div class="{{if $ok}}bg-ctp-green/10 border-ctp-green/30 text-ctp-green{{else}}bg-ctp-red/10 border-ctp-red/30 text-ctp-red{{end}} border text-sm rounded-lg px-4 py-3 flex items-center gap-2">
+        <i data-lucide="{{if $ok}}check-circle-2{{else}}circle-x{{end}}" class="w-4 h-4 shrink-0"></i>
+        {{.Flash}}
+    </div>
+    {{end}}
+
+    <!-- Status card -->
+    <div class="bg-ctp-mantle border {{if .User.MFAEnabled}}border-ctp-green/30{{else}}border-ctp-surface1{{end}} rounded-xl p-6 flex items-center gap-4">
+        <div class="p-3 rounded-xl {{if .User.MFAEnabled}}bg-ctp-green/10{{else}}bg-ctp-surface0{{end}} shrink-0">
+            <i data-lucide="scan-face" class="w-6 h-6 {{if .User.MFAEnabled}}text-ctp-green{{else}}text-ctp-overlay0{{end}}"></i>
+        </div>
+        <div class="flex-1">
+            <p class="text-sm font-semibold {{if .User.MFAEnabled}}text-ctp-green{{else}}text-ctp-text{{end}}">
+                {{if .User.MFAEnabled}}Two-factor auth is enabled{{else}}Two-factor auth is disabled{{end}}
+            </p>
+            <p class="text-xs font-mono text-ctp-overlay0 mt-0.5">
+                {{if .User.MFAEnabled}}Your account is protected with TOTP.{{else}}Enable TOTP via an authenticator app.{{end}}
+            </p>
+        </div>
+        {{if .User.MFAEnabled}}
+        <a href="/me/mfa/disable" class="text-xs font-mono text-ctp-red hover:text-ctp-red/70 border border-ctp-red/20 hover:border-ctp-red/40 rounded-lg px-3 py-1.5 transition-colors">
+            Disable
+        </a>
+        {{else}}
+        <a href="/me/mfa/setup" class="text-xs font-mono text-ctp-green hover:text-ctp-green/70 border border-ctp-green/20 hover:border-ctp-green/40 bg-ctp-green/5 hover:bg-ctp-green/10 rounded-lg px-3 py-1.5 transition-colors">
+            Enable
+        </a>
+        {{end}}
+    </div>
+
+    <!-- Info -->
+    <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-6 flex flex-col gap-3">
+        <h2 class="text-sm font-semibold text-ctp-text">How it works</h2>
+        <ul class="flex flex-col gap-2">
+            <li class="flex items-start gap-2.5 text-xs font-mono text-ctp-subtext0">
+                <span class="text-ctp-mauve mt-0.5">•</span>
+                Install an authenticator app like <span class="text-ctp-text">Authy</span> or <span class="text-ctp-text">Google Authenticator</span>
+            </li>
+            <li class="flex items-start gap-2.5 text-xs font-mono text-ctp-subtext0">
+                <span class="text-ctp-mauve mt-0.5">•</span>
+                Scan the QR code shown during setup
+            </li>
+            <li class="flex items-start gap-2.5 text-xs font-mono text-ctp-subtext0">
+                <span class="text-ctp-mauve mt-0.5">•</span>
+                Enter the 6-digit code on every sign in
+            </li>
+            <li class="flex items-start gap-2.5 text-xs font-mono text-ctp-subtext0">
+                <span class="text-ctp-mauve mt-0.5">•</span>
+                Save your backup codes in a secure place
+            </li>
+        </ul>
+    </div>
+
+</div>
+{{end}}
