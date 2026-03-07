@@ -1,0 +1,64 @@
+{{define "me_content"}}
+<div class="flex flex-col gap-6">
+
+    <div class="flex items-start justify-between">
+        <div>
+            <h1 class="font-display font-bold text-lg text-ctp-text">Sessions</h1>
+            <p class="text-ctp-overlay0 text-sm font-mono mt-0.5">Devices with active access to your account</p>
+        </div>
+        <form method="POST" action="/me/sessions/revoke-all">
+            <button type="submit" class="text-xs font-mono text-ctp-red hover:text-ctp-red/70 border border-ctp-red/30 hover:border-ctp-red/50 bg-ctp-red/5 hover:bg-ctp-red/10 rounded-lg px-3 py-1.5 transition-colors">
+                Sign out all others
+            </button>
+        </form>
+    </div>
+
+    {{if .Flash}}
+    {{$ok := eq .FlashType "success"}}
+    <div class="{{if $ok}}bg-ctp-green/10 border-ctp-green/30 text-ctp-green{{else}}bg-ctp-red/10 border-ctp-red/30 text-ctp-red{{end}} border text-sm rounded-lg px-4 py-3 flex items-center gap-2">
+        <i data-lucide="{{if $ok}}check-circle-2{{else}}circle-x{{end}}" class="w-4 h-4 shrink-0"></i>
+        {{if eq .Flash "revoked"}}Session revoked.
+        {{else if eq .Flash "all_revoked"}}All other sessions signed out.
+        {{else}}Session not found.{{end}}
+    </div>
+    {{end}}
+
+    <div class="flex flex-col gap-3">
+        {{range .Data}}
+        <div class="bg-ctp-mantle border {{if .IsCurrent}}border-ctp-mauve/30{{else}}border-ctp-surface1{{end}} rounded-xl px-5 py-4 flex items-center gap-4">
+            <div class="p-2 rounded-lg {{if .IsCurrent}}bg-ctp-mauve/10{{else}}bg-ctp-surface0{{end}} shrink-0">
+                <i data-lucide="monitor" class="w-4 h-4 {{if .IsCurrent}}text-ctp-mauve{{else}}text-ctp-overlay0{{end}}"></i>
+            </div>
+            <div class="flex-1 min-w-0 flex flex-col gap-0.5">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-mono text-ctp-text truncate">
+                        {{if .UserAgent}}{{.UserAgent}}{{else}}Unknown device{{end}}
+                    </span>
+                    {{if .IsCurrent}}
+                    <span class="shrink-0 text-[9px] font-mono font-bold text-ctp-mauve bg-ctp-mauve/10 border border-ctp-mauve/30 rounded px-1.5 py-0.5">current</span>
+                    {{end}}
+                </div>
+                <div class="flex items-center gap-3 text-[10px] font-mono text-ctp-overlay0">
+                    {{if .IPAddress}}<span>{{.IPAddress}}</span>{{end}}
+                    <span>Last seen {{.LastSeenAt.Format "Jan 2, 2006 15:04"}}</span>
+                </div>
+            </div>
+            {{if not .IsCurrent}}
+            <form method="POST" action="/me/sessions/revoke">
+                <input type="hidden" name="session_id" value="{{.ID}}">
+                <button type="submit" class="text-xs font-mono text-ctp-red hover:text-ctp-red/70 border border-ctp-red/20 hover:border-ctp-red/40 rounded-lg px-3 py-1.5 transition-colors">
+                    Revoke
+                </button>
+            </form>
+            {{end}}
+        </div>
+        {{else}}
+        <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl px-5 py-8 text-center">
+            <i data-lucide="monitor-x" class="w-8 h-8 text-ctp-overlay0 mx-auto mb-2"></i>
+            <p class="text-ctp-overlay0 text-sm font-mono">No active sessions found.</p>
+        </div>
+        {{end}}
+    </div>
+
+</div>
+{{end}}
