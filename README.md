@@ -1,4 +1,4 @@
-# ⚡ Switchboard
+# Switchboard
 
 > A Go polyglot playground — a connection board that routes signals between systems.
 
