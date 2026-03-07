@@ -547,6 +547,139 @@ func DeleteBackupCodes(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID
 	return err
 }
 
+// ── Admin queries ─────────────────────────────────────────────
+
+type UserRow struct {
+	ID            uuid.UUID
+	Email         string
+	DisplayName   *string
+	AvatarURL     *string
+	Role          string
+	IsActive      bool
+	MFAEnabled    bool
+	EmailVerified bool
+	CreatedAt     time.Time
+	LastLoginAt   *time.Time
+}
+
+func ListUsers(ctx context.Context, pool *pgxpool.Pool, search string) ([]UserRow, error) {
+	query := `
+		SELECT id, email, display_name, avatar_url, role, is_active,
+		       mfa_enabled, email_verified, created_at, last_login_at
+		FROM auth.users
+		WHERE ($1 = '' OR email ILIKE '%' || $1 || '%' OR display_name ILIKE '%' || $1 || '%')
+		ORDER BY created_at DESC
+	`
+	rows, err := pool.Query(ctx, query, search)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []UserRow
+	for rows.Next() {
+		var u UserRow
+		if err := rows.Scan(
+			&u.ID, &u.Email, &u.DisplayName, &u.AvatarURL,
+			&u.Role, &u.IsActive, &u.MFAEnabled, &u.EmailVerified,
+			&u.CreatedAt, &u.LastLoginAt,
+		); err != nil {
+			return nil, err
+		}
+		users = append(users, u)
+	}
+	return users, rows.Err()
+}
+
+func UpdateUserRole(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, role string) error {
+	_, err := pool.Exec(ctx, `
+		UPDATE auth.users SET role=$2, updated_at=NOW() WHERE id=$1
+	`, userID, role)
+	return err
+}
+
+func SetUserActive(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, active bool) error {
+	_, err := pool.Exec(ctx, `
+		UPDATE auth.users SET is_active=$2, updated_at=NOW() WHERE id=$1
+	`, userID, active)
+	return err
+}
+
+func DeleteUser(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) error {
+	_, err := pool.Exec(ctx, `DELETE FROM auth.users WHERE id=$1`, userID)
+	return err
+}
+
+type StatsRow struct {
+	Total     int
+	Active    int
+	WithMFA   int
+	OAuthOnly int
+	Verified  int
+}
+
+func GetStats(ctx context.Context, pool *pgxpool.Pool) (*StatsRow, error) {
+	s := &StatsRow{}
+	err := pool.QueryRow(ctx, `
+		SELECT
+			COUNT(*)                                      AS total,
+			COUNT(*) FILTER (WHERE is_active = true)      AS active,
+			COUNT(*) FILTER (WHERE mfa_enabled = true)    AS with_mfa,
+			COUNT(*) FILTER (WHERE password_hash IS NULL) AS oauth_only,
+			COUNT(*) FILTER (WHERE email_verified = true) AS verified
+		FROM auth.users
+	`).Scan(&s.Total, &s.Active, &s.WithMFA, &s.OAuthOnly, &s.Verified)
+	return s, err
+}
+
+type AuditRow struct {
+	ID        uuid.UUID
+	UserID    *uuid.UUID
+	UserEmail *string
+	Action    string
+	IPAddress *string
+	UserAgent *string
+	Metadata  []byte
+	CreatedAt time.Time
+}
+
+func ListAuditLog(ctx context.Context, pool *pgxpool.Pool, limit int) ([]AuditRow, error) {
+	rows, err := pool.Query(ctx, `
+		SELECT a.id, a.user_id, u.email,
+		       a.action, CAST(a.ip_address AS TEXT), a.user_agent,
+		       a.metadata, a.created_at
+		FROM auth.audit_log a
+		LEFT JOIN auth.users u ON u.id = a.user_id
+		ORDER BY a.created_at DESC
+		LIMIT $1
+	`, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var logs []AuditRow
+	for rows.Next() {
+		var r AuditRow
+		var ip, ua pgtype.Text
+		if err := rows.Scan(
+			&r.ID, &r.UserID, &r.UserEmail,
+			&r.Action, &ip, &ua,
+			&r.Metadata, &r.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		if ip.Valid {
+			r.IPAddress = &ip.String
+		}
+		if ua.Valid {
+			r.UserAgent = &ua.String
+		}
+		logs = append(logs, r)
+	}
+	return logs, rows.Err()
+}
+
 // ── Helpers ───────────────────────────────────────────────────
 
 func isDuplicateErr(err error) bool {

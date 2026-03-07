@@ -92,6 +92,7 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	firehose := handlers.NewFirehoseHandler(s.nc, s.log)
 	authH := handlers.NewAuthHandler(s.pool, s.log, s.cfg, s.sm, s.enc, s.turnstile, s.mailer)
 	oauthH := handlers.NewOAuthHandler(s.pool, s.log, s.cfg, s.sm)
+	adminH := handlers.NewAdminHandler(s.pool, s.log, s.cfg, s.sm)
 
 	indexTmpl := mustPage("services/gateway/templates/index.html")
 	postgresTmpl := mustPage("services/gateway/templates/partials/events.html")
@@ -144,7 +145,7 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /firehose", s.renderPage(firehoseTmpl))
 	mux.HandleFunc("GET /firehose/stream", firehose.Stream)
 
-	// Auth
+	// ── /auth routes ────────────────────────────────────────────────────
 	mux.Handle("GET /auth/signin", s.authMiddleware.RedirectIfAuth(http.HandlerFunc(authH.ShowLogin)))
 	mux.Handle("POST /auth/signin", s.authMiddleware.RedirectIfAuth(http.HandlerFunc(authH.Login)))
 	mux.Handle("GET /auth/signup", s.authMiddleware.RedirectIfAuth(http.HandlerFunc(authH.ShowRegister)))
@@ -154,15 +155,38 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	mux.Handle("GET /auth/verify-email/pending", http.HandlerFunc(authH.VerifyEmailPending))
 	mux.Handle("GET /auth/resend-verification", http.HandlerFunc(authH.ResendVerification))
 
-	// OAuth
+	// ── /auth/google routes ──────────────────────────────────────────────
 	mux.Handle("GET /auth/google", http.HandlerFunc(oauthH.RedirectToGoogle))
 	mux.Handle("GET /auth/google/callback", http.HandlerFunc(oauthH.GoogleCallback))
 
-	// Recovery Account
+	// ── /auth routes ────────────────────────────────────────────────────
 	mux.Handle("GET /auth/forgot-password", s.authMiddleware.RedirectIfAuth(http.HandlerFunc(authH.ShowForgotPassword)))
 	mux.Handle("POST /auth/forgot-password", s.authMiddleware.RedirectIfAuth(http.HandlerFunc(authH.ForgotPassword)))
 	mux.Handle("GET /auth/reset-password", s.authMiddleware.RedirectIfAuth(http.HandlerFunc(authH.ShowResetPassword)))
 	mux.Handle("POST /auth/reset-password", s.authMiddleware.RedirectIfAuth(http.HandlerFunc(authH.ResetPassword)))
+
+	// ── /me/users routes ────────────────────────────────────────────────
+	mux.Handle("GET /me/users", s.authMiddleware.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		adminH.Users(s.loadNavUser(r)).ServeHTTP(w, r)
+	})))
+	mux.Handle("POST /me/users/{id}/role", s.authMiddleware.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		adminH.UpdateRole(s.loadNavUser(r)).ServeHTTP(w, r)
+	})))
+	mux.Handle("POST /me/users/{id}/activate", s.authMiddleware.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		adminH.SetActive(s.loadNavUser(r)).ServeHTTP(w, r)
+	})))
+	mux.Handle("POST /me/users/{id}/delete", s.authMiddleware.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		adminH.DeleteUser(s.loadNavUser(r)).ServeHTTP(w, r)
+	})))
+	mux.Handle("POST /me/users/{id}/revoke-sessions", s.authMiddleware.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		adminH.RevokeSessions(s.loadNavUser(r)).ServeHTTP(w, r)
+	})))
+	mux.Handle("POST /me/users/{id}/disable-mfa", s.authMiddleware.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		adminH.DisableMFA(s.loadNavUser(r)).ServeHTTP(w, r)
+	})))
+	mux.Handle("GET /me/settings", s.authMiddleware.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		adminH.Settings(s.loadNavUser(r)).ServeHTTP(w, r)
+	})))
 
 	// ── /me routes ────────────────────────────────────────────────
 	mux.Handle("GET /me/profile", s.authMiddleware.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -193,7 +217,7 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 		s.meH.MFA(s.loadNavUser(r)).ServeHTTP(w, r)
 	})))
 
-	// Multi Factor Authentication
+	// ── /me/mfa routes ────────────────────────────────────────────────────
 	mux.Handle("GET /me/mfa/setup", s.authMiddleware.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s.meH.MFASetup(s.loadNavUser(r)).ServeHTTP(w, r)
 	})))
