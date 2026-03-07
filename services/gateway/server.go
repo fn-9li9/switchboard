@@ -192,6 +192,23 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	mux.Handle("GET /me/mfa", s.authMiddleware.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s.meH.MFA(s.loadNavUser(r)).ServeHTTP(w, r)
 	})))
+
+	// Multi Factor Authentication
+	mux.Handle("GET /me/mfa/setup", s.authMiddleware.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s.meH.MFASetup(s.loadNavUser(r)).ServeHTTP(w, r)
+	})))
+	mux.Handle("POST /me/mfa/setup", s.authMiddleware.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s.meH.MFASetupConfirm(s.loadNavUser(r)).ServeHTTP(w, r)
+	})))
+	mux.Handle("GET /me/mfa/backup-codes", s.authMiddleware.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s.meH.MFABackupCodes(s.loadNavUser(r)).ServeHTTP(w, r)
+	})))
+	mux.Handle("GET /me/mfa/backup-codes/download", s.authMiddleware.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s.meH.MFABackupCodesDownload(s.loadNavUser(r)).ServeHTTP(w, r)
+	})))
+	mux.Handle("POST /me/mfa/disable", s.authMiddleware.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s.meH.MFADisable(s.loadNavUser(r)).ServeHTTP(w, r)
+	})))
 }
 
 func (s *Server) renderPage(tmpl *template.Template) http.HandlerFunc {
