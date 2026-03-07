@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -36,20 +37,55 @@ type KafkaConfig struct {
 	GroupID string   `mapstructure:"group_id"`
 }
 
+type AuthConfig struct {
+	SessionSecret   string        `mapstructure:"session_secret"`
+	EncryptionKey   string        `mapstructure:"encryption_key"`
+	SessionDuration time.Duration `mapstructure:"session_duration"`
+	MFAIssuer       string        `mapstructure:"mfa_issuer"`
+}
+
+type GoogleConfig struct {
+	ClientID     string `mapstructure:"client_id"`
+	ClientSecret string `mapstructure:"client_secret"`
+	RedirectURI  string `mapstructure:"redirect_uri"`
+}
+
+type TurnstileConfig struct {
+	SecretKey string `mapstructure:"secret_key"`
+	SiteKey   string `mapstructure:"site_key"`
+}
+
+type SMTPConfig struct {
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
+	User     string `mapstructure:"user"`
+	Password string `mapstructure:"password"`
+	From     string `mapstructure:"from"`
+}
+
+type AppConfig struct {
+	URL string `mapstructure:"url"`
+}
+
 // ── Config raíz ────────────────────────────────────────────────────────────
 
 // Config contiene todos los campos posibles. Cada servicio solo usa
 // los que necesita; los demás quedan en zero-value.
 type Config struct {
-	Env          string         `mapstructure:"env"`
-	Service      string         `mapstructure:"service"`
-	Server       ServerConfig   `mapstructure:"server"`
-	Postgres     PostgresConfig `mapstructure:"postgres"`
-	Redis        RedisConfig    `mapstructure:"redis"`
-	NATS         NATSConfig     `mapstructure:"nats"`
-	Kafka        KafkaConfig    `mapstructure:"kafka"`
-	NotifierURL  string         `mapstructure:"notifier_url"`
-	ProcessorURL string         `mapstructure:"processor_url"`
+	Env          string          `mapstructure:"env"`
+	Service      string          `mapstructure:"service"`
+	Server       ServerConfig    `mapstructure:"server"`
+	Postgres     PostgresConfig  `mapstructure:"postgres"`
+	Redis        RedisConfig     `mapstructure:"redis"`
+	NATS         NATSConfig      `mapstructure:"nats"`
+	Kafka        KafkaConfig     `mapstructure:"kafka"`
+	NotifierURL  string          `mapstructure:"notifier_url"`
+	ProcessorURL string          `mapstructure:"processor_url"`
+	Auth         AuthConfig      `mapstructure:"auth"`
+	Google       GoogleConfig    `mapstructure:"google"`
+	Turnstile    TurnstileConfig `mapstructure:"turnstile"`
+	SMTP         SMTPConfig      `mapstructure:"smtp"`
+	App          AppConfig       `mapstructure:"app"`
 }
 
 // ── Loader ─────────────────────────────────────────────────────────────────
