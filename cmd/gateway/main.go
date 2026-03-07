@@ -12,9 +12,15 @@ import (
 	pgstore "switchboard/internal/store/postgres"
 	rstore "switchboard/internal/store/redis"
 	"switchboard/services/gateway"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	// Cargar .env antes que cualquier otra cosa.
+	// Silencioso si no existe — en prod las vars vienen del sistema.
+	_ = godotenv.Load()
+
 	cfg, err := config.Load("gateway")
 	if err != nil {
 		os.Stderr.WriteString("error loading config: " + err.Error() + "\n")
@@ -48,7 +54,6 @@ func main() {
 	defer producer.Close()
 
 	srv := gateway.NewServer(cfg, log, pool, rdb, nc, producer)
-
 	go func() {
 		if err := srv.Start(); err != nil {
 			log.Fatal().Err(err).Msg("server down")

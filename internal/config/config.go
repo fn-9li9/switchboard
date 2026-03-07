@@ -8,11 +8,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-// ── Structs compartidos ────────────────────────────────────────────────────
+// ── Structs ────────────────────────────────────────────────────
 
 type ServerConfig struct {
-	Port int    `mapstructure:"port"`
 	Host string `mapstructure:"host"`
+	Port int    `mapstructure:"port"`
 }
 
 type PostgresConfig struct {
@@ -68,10 +68,8 @@ type AppConfig struct {
 	URL string `mapstructure:"url"`
 }
 
-// ── Config raíz ────────────────────────────────────────────────────────────
+// ── Config raíz ────────────────────────────────────────────────
 
-// Config contiene todos los campos posibles. Cada servicio solo usa
-// los que necesita; los demás quedan en zero-value.
 type Config struct {
 	Env          string          `mapstructure:"env"`
 	Service      string          `mapstructure:"service"`
@@ -89,37 +87,76 @@ type Config struct {
 	App          AppConfig       `mapstructure:"app"`
 }
 
-// ── Loader ─────────────────────────────────────────────────────────────────
+// AppURL es un helper para acceder a la URL de la app desde cualquier lugar.
+func (c *Config) AppURL() string {
+	return c.App.URL
+}
 
-// Load lee configs/<service>.yaml y permite overrides con variables de entorno.
+// ── Loader ─────────────────────────────────────────────────────
+
+// Load lee .env + configs/<service>.yaml y mapea env vars con prefijo
+// del servicio (GATEWAY_*, PROCESSOR_*, NOTIFIER_*).
 //
-// Ejemplo de override:
+// Precedencia (mayor a menor):
+//  1. Variables de entorno del sistema
+//  2. Variables del .env
+//  3. configs/<service>.yaml
+//  4. Defaults del código
 //
-//	GATEWAY_SERVER_PORT=9090   → config.Server.Port = 9090
-//	PROCESSOR_POSTGRES_DSN=... → config.Postgres.DSN = "..."
-//	PROCESSOR_NOTIFIER_URL=... → config.NotifierURL = "..."
-//	PROCESSOR_PROCESSOR_URL=... → config.ProcessorURL = "..."
+// Mapeo de env vars (prefijo = servicio en mayúsculas):
 //
-// El prefijo es el nombre del servicio en mayúsculas.
+//	GATEWAY_AUTH_SESSION_SECRET   → cfg.Auth.SessionSecret
+//	GATEWAY_AUTH_ENCRYPTION_KEY   → cfg.Auth.EncryptionKey
+//	GATEWAY_GOOGLE_CLIENT_ID      → cfg.Google.ClientID
+//	GATEWAY_GOOGLE_CLIENT_SECRET  → cfg.Google.ClientSecret
+//	GATEWAY_GOOGLE_REDIRECT_URI   → cfg.Google.RedirectURI
+//	GATEWAY_TURNSTILE_SECRET_KEY  → cfg.Turnstile.SecretKey
+//	GATEWAY_TURNSTILE_SITE_KEY    → cfg.Turnstile.SiteKey
+//	GATEWAY_SMTP_HOST             → cfg.SMTP.Host
+//	GATEWAY_SMTP_PORT             → cfg.SMTP.Port
+//	GATEWAY_SMTP_USER             → cfg.SMTP.User
+//	GATEWAY_SMTP_PASSWORD         → cfg.SMTP.Password
+//	GATEWAY_SMTP_FROM             → cfg.SMTP.From
+//	GATEWAY_APP_URL               → cfg.App.URL
+//	GATEWAY_POSTGRES_DSN          → cfg.Postgres.DSN
+//	GATEWAY_REDIS_PASSWORD        → cfg.Redis.Password
 func Load(service string) (*Config, error) {
 	v := viper.New()
 
-	// Archivo base: configs/<service>.yaml
 	v.SetConfigName(service)
 	v.SetConfigType("yaml")
 	v.AddConfigPath("configs/")
-	v.AddConfigPath("../../configs/") // útil si se ejecuta desde cmd/<service>/
+	v.AddConfigPath("../../configs/")
 
-	// Defaults para URLs de notifier y processor
-	v.SetDefault("notifier_url", "http://localhost:8081")
-	v.SetDefault("processor_url", "http://localhost:8082")
+	prefix := strings.ToUpper(service) + "_"
 
-	// Overrides por env vars: GATEWAY_SERVER_PORT → server.port
 	v.SetEnvPrefix(strings.ToUpper(service))
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 
-	// Defaults razonables
+	// Bind explícito para garantizar que viper lea las env vars
+	// independientemente de si la key existe en el YAML o no
+	binds := map[string]string{
+		"auth.session_secret":  prefix + "AUTH_SESSION_SECRET",
+		"auth.encryption_key":  prefix + "AUTH_ENCRYPTION_KEY",
+		"google.client_id":     prefix + "GOOGLE_CLIENT_ID",
+		"google.client_secret": prefix + "GOOGLE_CLIENT_SECRET",
+		"google.redirect_uri":  prefix + "GOOGLE_REDIRECT_URI",
+		"turnstile.secret_key": prefix + "TURNSTILE_SECRET_KEY",
+		"turnstile.site_key":   prefix + "TURNSTILE_SITE_KEY",
+		"smtp.host":            prefix + "SMTP_HOST",
+		"smtp.port":            prefix + "SMTP_PORT",
+		"smtp.user":            prefix + "SMTP_USER",
+		"smtp.password":        prefix + "SMTP_PASSWORD",
+		"smtp.from":            prefix + "SMTP_FROM",
+		"app.url":              prefix + "APP_URL",
+		"postgres.dsn":         prefix + "POSTGRES_DSN",
+		"redis.password":       prefix + "REDIS_PASSWORD",
+	}
+	for key, env := range binds {
+		v.BindEnv(key, env)
+	}
+
 	v.SetDefault("env", AppEnv())
 	v.SetDefault("service", service)
 	v.SetDefault("server.host", "0.0.0.0")
@@ -132,9 +169,15 @@ func Load(service string) (*Config, error) {
 	v.SetDefault("nats.url", "nats://localhost:4222")
 	v.SetDefault("kafka.brokers", []string{"localhost:9092"})
 	v.SetDefault("kafka.group_id", "switchboard-"+service)
+	v.SetDefault("notifier_url", "http://localhost:8081")
+	v.SetDefault("processor_url", "http://localhost:8082")
+	v.SetDefault("auth.session_duration", "720h")
+	v.SetDefault("auth.mfa_issuer", "switchboard")
+	v.SetDefault("smtp.host", "smtp.gmail.com")
+	v.SetDefault("smtp.port", 587)
+	v.SetDefault("app.url", "http://localhost:8080")
 
 	if err := v.ReadInConfig(); err != nil {
-		// Si no existe el archivo YAML usamos solo defaults + env vars.
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			return nil, fmt.Errorf("config: error leyendo %s.yaml: %w", service, err)
 		}
@@ -142,7 +185,11 @@ func Load(service string) (*Config, error) {
 
 	var cfg Config
 	if err := v.Unmarshal(&cfg); err != nil {
-		return nil, fmt.Errorf("config: error haciendo unmarshal: %w", err)
+		return nil, fmt.Errorf("config: unmarshal: %w", err)
+	}
+
+	if err := validate(&cfg, service); err != nil {
+		return nil, err
 	}
 
 	return &cfg, nil
