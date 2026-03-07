@@ -61,6 +61,7 @@ type SMTPConfig struct {
 	User     string `mapstructure:"user"`
 	Password string `mapstructure:"password"`
 	From     string `mapstructure:"from"`
+	AppURL   string `mapstructure:"app_url"`
 }
 
 type AppConfig struct {
