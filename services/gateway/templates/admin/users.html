@@ -1,0 +1,178 @@
+{{define "me_content"}}
+<div class="flex flex-col gap-6">
+
+    <div class="flex items-start justify-between">
+        <div>
+            <h1 class="font-display font-bold text-lg text-ctp-text">Users</h1>
+            <p class="text-ctp-overlay0 text-sm font-mono mt-0.5">Manage all accounts</p>
+        </div>
+        <span class="text-xs font-mono text-ctp-peach bg-ctp-peach/10 border border-ctp-peach/30 rounded-lg px-2.5 py-1">
+            root only
+        </span>
+    </div>
+
+    {{if .Flash}}
+    {{$ok := eq .FlashType "success"}}
+    <div class="{{if $ok}}bg-ctp-green/10 border-ctp-green/30 text-ctp-green{{else}}bg-ctp-red/10 border-ctp-red/30 text-ctp-red{{end}} border text-sm rounded-lg px-4 py-3 flex items-center gap-2">
+        <i data-lucide="{{if $ok}}check-circle-2{{else}}circle-x{{end}}" class="w-4 h-4 shrink-0"></i>
+        {{if eq .Flash "role_updated"}}Role updated successfully.
+        {{else if eq .Flash "user_activated"}}Account activated.
+        {{else if eq .Flash "user_deactivated"}}Account deactivated and sessions revoked.
+        {{else if eq .Flash "user_deleted"}}User deleted.
+        {{else if eq .Flash "sessions_revoked"}}All sessions revoked.
+        {{else if eq .Flash "mfa_disabled"}}MFA disabled for user.
+        {{else if eq .Flash "self_role"}}You cannot change your own role.
+        {{else if eq .Flash "self_deactivate"}}You cannot deactivate your own account.
+        {{else if eq .Flash "self_delete"}}You cannot delete your own account.
+        {{else}}{{.Flash}}{{end}}
+    </div>
+    {{end}}
+
+    <!-- Search -->
+    {{with .Data}}
+    <form method="GET" action="/me/users" class="flex gap-2">
+        <div class="relative flex-1 flex items-center">
+            <i data-lucide="search" class="absolute left-3 w-4 h-4 text-ctp-overlay0 shrink-0"></i>
+            <input type="text" name="q" value="{{.Search}}" placeholder="Search by email or name..." class="w-full bg-transparent border border-ctp-surface1 focus:border-ctp-mauve
+                    rounded-lg pl-9 pr-4 py-2 text-ctp-text text-sm outline-none transition-colors" />
+        </div>
+        <button type="submit" class="bg-ctp-surface1 hover:bg-ctp-surface2 text-ctp-text text-sm font-mono
+                   rounded-lg px-4 py-2 transition-colors">
+            Search
+        </button>
+        {{if .Search}}
+        <a href="/me/users" class="flex items-center gap-1 text-xs font-mono text-ctp-overlay0 hover:text-ctp-text
+              border border-ctp-surface1 rounded-lg px-3 py-2 transition-colors">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i> Clear
+        </a>
+        {{end}}
+    </form>
+
+    <!-- Table -->
+    <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl overflow-hidden">
+        {{if .Users}}
+        <table class="w-full text-xs font-mono">
+            <thead>
+                <tr class="border-b border-ctp-surface1">
+                    <th class="text-left text-ctp-overlay0 px-4 py-3 font-medium">User</th>
+                    <th class="text-left text-ctp-overlay0 px-4 py-3 font-medium">Role</th>
+                    <th class="text-left text-ctp-overlay0 px-4 py-3 font-medium">Status</th>
+                    <th class="text-left text-ctp-overlay0 px-4 py-3 font-medium">MFA</th>
+                    <th class="text-left text-ctp-overlay0 px-4 py-3 font-medium">Joined</th>
+                    <th class="text-right text-ctp-overlay0 px-4 py-3 font-medium">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Users}}
+                <tr class="border-b border-ctp-surface0 hover:bg-ctp-surface0/50 transition-colors">
+
+                    <!-- User -->
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-2.5">
+                            {{if .AvatarURL}}
+                            <img src="{{.AvatarURL}}" class="w-6 h-6 rounded-full object-cover shrink-0" />
+                            {{else}}
+                            <div class="w-6 h-6 rounded-full bg-ctp-surface1 flex items-center justify-center shrink-0">
+                                <span class="text-[9px] font-bold text-ctp-mauve">
+                                    {{if .DisplayName}}{{slice .DisplayName 0 1}}{{else}}{{slice .Email 0 1}}{{end}}
+                                </span>
+                            </div>
+                            {{end}}
+                            <div class="flex flex-col min-w-0">
+                                <span class="text-ctp-text truncate">{{.Email}}</span>
+                                {{if .DisplayName}}
+                                <span class="text-ctp-overlay0 text-[10px] truncate">{{.DisplayName}}</span>
+                                {{end}}
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- Role -->
+                    <td class="px-4 py-3">
+                        <form method="POST" action="/me/users/{{.ID}}/role" class="flex items-center gap-1.5">
+                            <select name="role" onchange="this.form.submit()" class="bg-ctp-surface0 border border-ctp-surface1 rounded-md px-2 py-1
+                             text-xs font-mono text-ctp-text outline-none cursor-pointer
+                             {{if eq .Role " root"}}text-ctp-peach{{else}}text-ctp-subtext0{{end}}">
+                                <option value="default" {{if eq .Role "default" }}selected{{end}}>default</option>
+                                <option value="root" {{if eq .Role "root" }}selected{{end}}>root</option>
+                            </select>
+                        </form>
+                    </td>
+
+                    <!-- Status -->
+                    <td class="px-4 py-3">
+                        <form method="POST" action="/me/users/{{.ID}}/activate">
+                            {{if .IsActive}}
+                            <input type="hidden" name="active" value="false">
+                            <button type="submit" class="flex items-center gap-1 text-ctp-green bg-ctp-green/10 border border-ctp-green/20
+                               rounded-md px-2 py-1 hover:bg-ctp-red/10 hover:text-ctp-red hover:border-ctp-red/20
+                               transition-colors text-[10px]">
+                                <i data-lucide="check" class="w-3 h-3"></i> active
+                            </button>
+                            {{else}}
+                            <input type="hidden" name="active" value="true">
+                            <button type="submit" class="flex items-center gap-1 text-ctp-red bg-ctp-red/10 border border-ctp-red/20
+                               rounded-md px-2 py-1 hover:bg-ctp-green/10 hover:text-ctp-green hover:border-ctp-green/20
+                               transition-colors text-[10px]">
+                                <i data-lucide="x" class="w-3 h-3"></i> inactive
+                            </button>
+                            {{end}}
+                        </form>
+                    </td>
+
+                    <!-- MFA -->
+                    <td class="px-4 py-3">
+                        {{if .MFAEnabled}}
+                        <span class="text-ctp-green bg-ctp-green/10 border border-ctp-green/20 rounded-md px-2 py-1 text-[10px]">on</span>
+                        {{else}}
+                        <span class="text-ctp-overlay0 bg-ctp-surface1 rounded-md px-2 py-1 text-[10px]">off</span>
+                        {{end}}
+                    </td>
+
+                    <!-- Joined -->
+                    <td class="px-4 py-3 text-ctp-overlay0">
+                        {{.CreatedAt.Format "Jan 2, 2006"}}
+                    </td>
+
+                    <!-- Actions dropdown -->
+                    <td class="px-4 py-3">
+                        <div class="flex items-center justify-end gap-1.5">
+
+                            {{if .MFAEnabled}}
+                            <form method="POST" action="/me/users/{{.ID}}/disable-mfa">
+                                <button type="submit" title="Disable MFA" class="p-1.5 rounded-md text-ctp-overlay0 hover:text-ctp-yellow hover:bg-ctp-yellow/10 transition-colors">
+                                    <i data-lucide="scan-face" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </form>
+                            {{end}}
+
+                            <form method="POST" action="/me/users/{{.ID}}/revoke-sessions">
+                                <button type="submit" title="Revoke all sessions" class="p-1.5 rounded-md text-ctp-overlay0 hover:text-ctp-peach hover:bg-ctp-peach/10 transition-colors">
+                                    <i data-lucide="monitor-x" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </form>
+
+                            <form method="POST" action="/me/users/{{.ID}}/delete" onsubmit="return confirm('Delete {{.Email}}? This cannot be undone.')">
+                                <button type="submit" title="Delete user" class="p-1.5 rounded-md text-ctp-overlay0 hover:text-ctp-red hover:bg-ctp-red/10 transition-colors">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </form>
+
+                        </div>
+                    </td>
+
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+        {{else}}
+        <div class="px-5 py-10 text-center">
+            <i data-lucide="users-x" class="w-8 h-8 text-ctp-overlay0 mx-auto mb-2"></i>
+            <p class="text-ctp-overlay0 text-sm font-mono">No users found.</p>
+        </div>
+        {{end}}
+    </div>
+    {{end}}
+
+</div>
+{{end}}

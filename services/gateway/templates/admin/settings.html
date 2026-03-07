@@ -1,0 +1,110 @@
+{{define "me_content"}}
+<div class="flex flex-col gap-8">
+
+    <div class="flex items-start justify-between">
+        <div>
+            <h1 class="font-display font-bold text-lg text-ctp-text">Settings</h1>
+            <p class="text-ctp-overlay0 text-sm font-mono mt-0.5">System overview and audit log</p>
+        </div>
+        <span class="text-xs font-mono text-ctp-peach bg-ctp-peach/10 border border-ctp-peach/30 rounded-lg px-2.5 py-1">
+            root only
+        </span>
+    </div>
+
+    {{with .Data}}
+
+    <!-- Stats grid -->
+    {{if .Stats}}
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+
+        <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl p-4 flex flex-col gap-1">
+            <span class="text-ctp-overlay0 text-[10px] font-mono uppercase tracking-widest">Total</span>
+            <span class="text-2xl font-bold text-ctp-text font-mono">{{.Stats.Total}}</span>
+            <span class="text-[10px] font-mono text-ctp-overlay0">users</span>
+        </div>
+
+        <div class="bg-ctp-mantle border border-ctp-green/20 rounded-xl p-4 flex flex-col gap-1">
+            <span class="text-ctp-overlay0 text-[10px] font-mono uppercase tracking-widest">Active</span>
+            <span class="text-2xl font-bold text-ctp-green font-mono">{{.Stats.Active}}</span>
+            <span class="text-[10px] font-mono text-ctp-overlay0">accounts</span>
+        </div>
+
+        <div class="bg-ctp-mantle border border-ctp-sapphire/20 rounded-xl p-4 flex flex-col gap-1">
+            <span class="text-ctp-overlay0 text-[10px] font-mono uppercase tracking-widest">Verified</span>
+            <span class="text-2xl font-bold text-ctp-sapphire font-mono">{{.Stats.Verified}}</span>
+            <span class="text-[10px] font-mono text-ctp-overlay0">emails</span>
+        </div>
+
+        <div class="bg-ctp-mantle border border-ctp-mauve/20 rounded-xl p-4 flex flex-col gap-1">
+            <span class="text-ctp-overlay0 text-[10px] font-mono uppercase tracking-widest">MFA</span>
+            <span class="text-2xl font-bold text-ctp-mauve font-mono">{{.Stats.WithMFA}}</span>
+            <span class="text-[10px] font-mono text-ctp-overlay0">enabled</span>
+        </div>
+
+        <div class="bg-ctp-mantle border border-ctp-peach/20 rounded-xl p-4 flex flex-col gap-1">
+            <span class="text-ctp-overlay0 text-[10px] font-mono uppercase tracking-widest">OAuth</span>
+            <span class="text-2xl font-bold text-ctp-peach font-mono">{{.Stats.OAuthOnly}}</span>
+            <span class="text-[10px] font-mono text-ctp-overlay0">google only</span>
+        </div>
+
+    </div>
+    {{end}}
+
+    <!-- Audit log -->
+    <div class="flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-ctp-text">Audit log</h2>
+            <span class="text-[10px] font-mono text-ctp-overlay0">last 50 events</span>
+        </div>
+
+        <div class="bg-ctp-mantle border border-ctp-surface1 rounded-xl overflow-hidden">
+            {{if .AuditLog}}
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs font-mono">
+                    <thead>
+                        <tr class="border-b border-ctp-surface1">
+                            <th class="text-left text-ctp-overlay0 px-4 py-3 font-medium">Time</th>
+                            <th class="text-left text-ctp-overlay0 px-4 py-3 font-medium">Action</th>
+                            <th class="text-left text-ctp-overlay0 px-4 py-3 font-medium">User</th>
+                            <th class="text-left text-ctp-overlay0 px-4 py-3 font-medium">IP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .AuditLog}}
+                        <tr class="border-b border-ctp-surface0 hover:bg-ctp-surface0/50 transition-colors">
+
+                            <td class="px-4 py-2.5 text-ctp-overlay0 whitespace-nowrap">
+                                {{.CreatedAt.Format "Jan 2 15:04:05"}}
+                            </td>
+
+                            <td class="px-4 py-2.5">
+                                <span class="{{actionColor .Action}} px-2 py-0.5 rounded-md text-[10px] font-semibold">
+                                    {{.Action}}
+                                </span>
+                            </td>
+
+                            <td class="px-4 py-2.5 text-ctp-subtext0">
+                                {{if .UserEmail}}{{.UserEmail}}{{else}}<span class="text-ctp-overlay0">—</span>{{end}}
+                            </td>
+
+                            <td class="px-4 py-2.5 text-ctp-overlay0">
+                                {{if .IPAddress}}{{.IPAddress}}{{else}}—{{end}}
+                            </td>
+
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+            {{else}}
+            <div class="px-5 py-10 text-center">
+                <i data-lucide="scroll-text" class="w-8 h-8 text-ctp-overlay0 mx-auto mb-2"></i>
+                <p class="text-ctp-overlay0 text-sm font-mono">No audit events yet.</p>
+            </div>
+            {{end}}
+        </div>
+    </div>
+
+    {{end}}
+</div>
+{{end}}
