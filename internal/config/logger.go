@@ -9,9 +9,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// InitLogger configura el logger global de zerolog.
-// En dev: ConsoleWriter coloreado con timestamps legibles.
-// En prod: JSON compacto a stdout.
 func InitLogger(env, service string) zerolog.Logger {
 	var output io.Writer
 
@@ -39,7 +36,6 @@ func InitLogger(env, service string) zerolog.Logger {
 		Str("service", service).
 		Logger()
 
-	// Reemplaza el logger global para que log.Info(), etc. funcionen en cualquier parte.
 	log.Logger = logger
 
 	return logger

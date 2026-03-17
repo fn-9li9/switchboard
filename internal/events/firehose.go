@@ -10,7 +10,6 @@ import (
 
 const Subject = "switchboard.firehose"
 
-// EventType identifica el origen del evento.
 type EventType string
 
 const (
@@ -22,7 +21,6 @@ const (
 	TypeSystem    EventType = "system"
 )
 
-// FirehoseEvent es el mensaje que todos los servicios emiten.
 type FirehoseEvent struct {
 	Type    EventType `json:"type"`
 	Service string    `json:"service"`
@@ -31,7 +29,6 @@ type FirehoseEvent struct {
 	At      time.Time `json:"at"`
 }
 
-// Emit publica un FirehoseEvent a NATS. No bloquea — falla silencioso con log.
 func Emit(nc *nats.Conn, log zerolog.Logger, evt FirehoseEvent) {
 	evt.At = time.Now()
 	data, err := json.Marshal(evt)

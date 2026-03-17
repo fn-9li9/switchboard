@@ -8,8 +8,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-// ── Structs ────────────────────────────────────────────────────
-
 type ServerConfig struct {
 	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
@@ -68,8 +66,6 @@ type AppConfig struct {
 	URL string `mapstructure:"url"`
 }
 
-// ── Config raíz ────────────────────────────────────────────────
-
 type Config struct {
 	Env          string          `mapstructure:"env"`
 	Service      string          `mapstructure:"service"`
@@ -87,12 +83,9 @@ type Config struct {
 	App          AppConfig       `mapstructure:"app"`
 }
 
-// AppURL es un helper para acceder a la URL de la app desde cualquier lugar.
 func (c *Config) AppURL() string {
 	return c.App.URL
 }
-
-// ── Loader ─────────────────────────────────────────────────────
 
 func Load(service string) (*Config, error) {
 	v := viper.New()
@@ -108,8 +101,6 @@ func Load(service string) (*Config, error) {
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 
-	// Bind explícito para garantizar que viper lea las env vars
-	// independientemente de si la key existe en el YAML o no
 	binds := map[string]string{
 		"auth.session_secret":  prefix + "AUTH_SESSION_SECRET",
 		"auth.encryption_key":  prefix + "AUTH_ENCRYPTION_KEY",

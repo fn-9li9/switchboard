@@ -10,10 +10,8 @@ import (
 	"github.com/rs/zerolog"
 )
 
-// Handler es la función que procesa cada mensaje consumido.
 type Handler func(msg *sarama.ConsumerMessage) error
 
-// ConsumerGroup envuelve sarama.ConsumerGroup con un Handler.
 type ConsumerGroup struct {
 	group   sarama.ConsumerGroup
 	topics  []string
@@ -21,7 +19,6 @@ type ConsumerGroup struct {
 	log     zerolog.Logger
 }
 
-// NewConsumerGroup crea un ConsumerGroup listo para consumir.
 func NewConsumerGroup(cfg config.KafkaConfig, topics []string, handler Handler, log zerolog.Logger) (*ConsumerGroup, error) {
 	sc := sarama.NewConfig()
 	sc.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.NewBalanceStrategyRoundRobin()}
@@ -32,11 +29,7 @@ func NewConsumerGroup(cfg config.KafkaConfig, topics []string, handler Handler, 
 		return nil, fmt.Errorf("kafka: error creando consumer group %q: %w", cfg.GroupID, err)
 	}
 
-	log.Info().
-		Strs("brokers", cfg.Brokers).
-		Str("group_id", cfg.GroupID).
-		Strs("topics", topics).
-		Msg("kafka consumer conectado")
+	log.Info().Strs("brokers", cfg.Brokers).Str("group_id", cfg.GroupID).Strs("topics", topics).Msg("kafka consumer conectado")
 
 	return &ConsumerGroup{
 		group:   group,
@@ -46,7 +39,6 @@ func NewConsumerGroup(cfg config.KafkaConfig, topics []string, handler Handler, 
 	}, nil
 }
 
-// Start bloquea consumiendo mensajes hasta que el context se cancele.
 func (c *ConsumerGroup) Start(ctx context.Context) error {
 	h := &cgHandler{handler: c.handler, log: c.log}
 
@@ -55,17 +47,14 @@ func (c *ConsumerGroup) Start(ctx context.Context) error {
 			return fmt.Errorf("kafka: consume error: %w", err)
 		}
 		if ctx.Err() != nil {
-			return nil // shutdown limpio
+			return nil
 		}
 	}
 }
 
-// Close cierra el consumer group.
 func (c *ConsumerGroup) Close() error {
 	return c.group.Close()
 }
-
-// ── sarama.ConsumerGroupHandler ───────────────────────────────────────────
 
 type cgHandler struct {
 	handler Handler
@@ -85,11 +74,7 @@ func (h *cgHandler) Cleanup(s sarama.ConsumerGroupSession) error {
 func (h *cgHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
 		if err := h.handler(msg); err != nil {
-			h.log.Error().
-				Err(err).
-				Str("topic", msg.Topic).
-				Int64("offset", msg.Offset).
-				Msg("kafka: error procesando mensaje")
+			h.log.Error().Err(err).Str("topic", msg.Topic).Int64("offset", msg.Offset).Msg("kafka: error procesando mensaje")
 		} else {
 			session.MarkMessage(msg, "")
 		}

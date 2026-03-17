@@ -9,12 +9,11 @@ import (
 	"github.com/rs/zerolog"
 )
 
-// NewConn crea y valida una conexión NATS con reconexión automática.
 func NewConn(cfg config.NATSConfig, log zerolog.Logger) (*nats.Conn, error) {
 	conn, err := nats.Connect(
 		cfg.URL,
 		nats.Name("switchboard"),
-		nats.MaxReconnects(-1), // reconecta indefinidamente
+		nats.MaxReconnects(-1),
 		nats.ReconnectHandler(func(nc *nats.Conn) {
 			log.Warn().Str("url", nc.ConnectedUrl()).Msg("nats: reconectado")
 		}),

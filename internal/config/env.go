@@ -7,7 +7,6 @@ import (
 	"strings"
 )
 
-// Env devuelve la variable de entorno o el valor por defecto si no está definida.
 func Env(key, defaultVal string) string {
 	if v := os.Getenv(key); v != "" {
 		return v
@@ -15,7 +14,6 @@ func Env(key, defaultVal string) string {
 	return defaultVal
 }
 
-// EnvInt devuelve la variable de entorno como int o el valor por defecto.
 func EnvInt(key string, defaultVal int) int {
 	v := os.Getenv(key)
 	if v == "" {
@@ -28,7 +26,6 @@ func EnvInt(key string, defaultVal int) int {
 	return n
 }
 
-// EnvBool devuelve la variable de entorno como bool o el valor por defecto.
 func EnvBool(key string, defaultVal bool) bool {
 	v := os.Getenv(key)
 	if v == "" {
@@ -41,13 +38,10 @@ func EnvBool(key string, defaultVal bool) bool {
 	return b
 }
 
-// AppEnv devuelve el entorno de ejecución: "dev" o "prod".
-// Se controla con la variable APP_ENV.
 func AppEnv() string {
 	return Env("APP_ENV", "dev")
 }
 
-// validate falla rápido si faltan secretos críticos en el gateway.
 func validate(cfg *Config, service string) error {
 	if service != "gateway" {
 		return nil
@@ -79,8 +73,7 @@ func validate(cfg *Config, service string) error {
 	}
 
 	if len(missing) > 0 {
-		return fmt.Errorf("config: missing required secrets:\n  %s\n\nCopy .env.example to .env and fill in the values.",
-			strings.Join(missing, "\n  "))
+		return fmt.Errorf("config: missing required secrets:\n  %s\n\nCopy .env.example to .env and fill in the values.", strings.Join(missing, "\n  "))
 	}
 
 	return nil

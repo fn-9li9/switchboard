@@ -9,7 +9,6 @@ import (
 	"github.com/rs/zerolog"
 )
 
-// NewProducer crea un SyncProducer con acks=all y reintentos.
 func NewProducer(cfg config.KafkaConfig, log zerolog.Logger) (sarama.SyncProducer, error) {
 	sc := sarama.NewConfig()
 	sc.Producer.Return.Successes = true
@@ -26,12 +25,8 @@ func NewProducer(cfg config.KafkaConfig, log zerolog.Logger) (sarama.SyncProduce
 	return producer, nil
 }
 
-// Publish envía un mensaje a un topic. Devuelve partición y offset.
 func Publish(producer sarama.SyncProducer, topic string, key, value []byte) (int32, int64, error) {
-	msg := &sarama.ProducerMessage{
-		Topic: topic,
-		Value: sarama.ByteEncoder(value),
-	}
+	msg := &sarama.ProducerMessage{Topic: topic, Value: sarama.ByteEncoder(value)}
 	if key != nil {
 		msg.Key = sarama.ByteEncoder(key)
 	}

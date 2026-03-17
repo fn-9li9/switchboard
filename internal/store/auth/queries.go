@@ -446,11 +446,7 @@ func GetOAuthProvider(
 		       token_expires_at, raw_profile, created_at, updated_at
 		FROM auth.oauth_providers
 		WHERE provider = $1 AND provider_uid = $2
-	`, provider, providerUID).Scan(
-		&op.ID, &op.UserID, &op.Provider, &op.ProviderUID,
-		&op.AccessToken, &op.RefreshToken, &op.TokenExpiresAt,
-		&op.RawProfile, &op.CreatedAt, &op.UpdatedAt,
-	)
+	`, provider, providerUID).Scan(&op.ID, &op.UserID, &op.Provider, &op.ProviderUID, &op.AccessToken, &op.RefreshToken, &op.TokenExpiresAt, &op.RawProfile, &op.CreatedAt, &op.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrNotFound
@@ -546,8 +542,6 @@ func DeleteBackupCodes(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID
 	`, userID)
 	return err
 }
-
-// ── Admin queries ─────────────────────────────────────────────
 
 type UserRow struct {
 	ID            uuid.UUID
@@ -662,11 +656,7 @@ func ListAuditLog(ctx context.Context, pool *pgxpool.Pool, limit int) ([]AuditRo
 	for rows.Next() {
 		var r AuditRow
 		var ip, ua pgtype.Text
-		if err := rows.Scan(
-			&r.ID, &r.UserID, &r.UserEmail,
-			&r.Action, &ip, &ua,
-			&r.Metadata, &r.CreatedAt,
-		); err != nil {
+		if err := rows.Scan(&r.ID, &r.UserID, &r.UserEmail, &r.Action, &ip, &ua, &r.Metadata, &r.CreatedAt); err != nil {
 			return nil, err
 		}
 		if ip.Valid {

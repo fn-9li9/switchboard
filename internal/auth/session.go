@@ -18,7 +18,6 @@ const (
 	cookieTTL  = 30 * 24 * time.Hour
 )
 
-// SessionManager firma y verifica cookies de sesión con HMAC-SHA256.
 type SessionManager struct {
 	secret []byte
 }
@@ -34,7 +33,6 @@ func NewSessionManager(hexSecret string) (*SessionManager, error) {
 	return &SessionManager{secret: secret}, nil
 }
 
-// SessionData es lo que se almacena en el contexto después de validar la cookie.
 type SessionData struct {
 	SessionID   string
 	UserID      uuid.UUID
@@ -43,7 +41,6 @@ type SessionData struct {
 	MFAVerified bool
 }
 
-// SetCookie firma el sessionID y lo escribe como cookie httpOnly.
 func (sm *SessionManager) SetCookie(w http.ResponseWriter, sessionID string) {
 	signed := sm.sign(sessionID)
 	value := sessionID + "." + signed
@@ -53,13 +50,12 @@ func (sm *SessionManager) SetCookie(w http.ResponseWriter, sessionID string) {
 		Value:    value,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   false, // true en producción con TLS
+		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   int(cookieTTL.Seconds()),
 	})
 }
 
-// ClearCookie invalida la cookie en el browser.
 func (sm *SessionManager) ClearCookie(w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     cookieName,
@@ -72,8 +68,6 @@ func (sm *SessionManager) ClearCookie(w http.ResponseWriter) {
 	})
 }
 
-// ParseCookie extrae y verifica el sessionID de la cookie.
-// Devuelve el sessionID si la firma es válida.
 func (sm *SessionManager) ParseCookie(r *http.Request) (string, error) {
 	cookie, err := r.Cookie(cookieName)
 	if err != nil {
@@ -101,19 +95,14 @@ func (sm *SessionManager) sign(value string) string {
 	return hex.EncodeToString(mac.Sum(nil))
 }
 
-// ── Context helpers ───────────────────────────────────────────
-
 type contextKey string
 
 const sessionContextKey contextKey = "session"
 
-// WithSession inyecta la sesión en el contexto.
 func WithSession(ctx context.Context, s *SessionData) context.Context {
 	return context.WithValue(ctx, sessionContextKey, s)
 }
 
-// SessionFromContext extrae la sesión del contexto.
-// Devuelve nil si no hay sesión.
 func SessionFromContext(ctx context.Context) *SessionData {
 	s, _ := ctx.Value(sessionContextKey).(*SessionData)
 	return s

@@ -37,9 +37,7 @@ func HashPassword(password string) (string, error) {
 	saltB64 := base64.RawURLEncoding.EncodeToString(salt)
 	hashB64 := base64.RawURLEncoding.EncodeToString(hash)
 
-	return fmt.Sprintf("argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s",
-		argon2.Version, argonMemory, argonTime, argonThreads, saltB64, hashB64,
-	), nil
+	return fmt.Sprintf("argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s", argon2.Version, argonMemory, argonTime, argonThreads, saltB64, hashB64), nil
 }
 
 func VerifyPassword(password, encodedHash string) error {

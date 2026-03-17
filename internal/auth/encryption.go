@@ -9,8 +9,6 @@ import (
 	"io"
 )
 
-// Encryptor maneja AES-256-GCM encrypt/decrypt.
-// La key debe ser exactamente 32 bytes (hex de 64 chars).
 type Encryptor struct {
 	key []byte
 }
@@ -26,8 +24,6 @@ func NewEncryptor(hexKey string) (*Encryptor, error) {
 	return &Encryptor{key: key}, nil
 }
 
-// Encrypt cifra plaintext con AES-256-GCM.
-// Devuelve hex(nonce + ciphertext + tag).
 func (e *Encryptor) Encrypt(plaintext string) (string, error) {
 	block, err := aes.NewCipher(e.key)
 	if err != nil {
@@ -48,7 +44,6 @@ func (e *Encryptor) Encrypt(plaintext string) (string, error) {
 	return hex.EncodeToString(ciphertext), nil
 }
 
-// Decrypt descifra un valor producido por Encrypt.
 func (e *Encryptor) Decrypt(hexCiphertext string) (string, error) {
 	data, err := hex.DecodeString(hexCiphertext)
 	if err != nil {
@@ -79,7 +74,6 @@ func (e *Encryptor) Decrypt(hexCiphertext string) (string, error) {
 	return string(plaintext), nil
 }
 
-// GenerateRandomHex genera n bytes aleatorios como string hex.
 func GenerateRandomHex(n int) (string, error) {
 	b := make([]byte, n)
 	if _, err := io.ReadFull(rand.Reader, b); err != nil {

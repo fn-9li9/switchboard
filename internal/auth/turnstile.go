@@ -33,26 +33,17 @@ type turnstileResponse struct {
 	ChallengeTS string   `json:"challenge_ts"`
 }
 
-// Verify valida el token Turnstile del cliente contra la API de Cloudflare.
-// remoteIP es opcional — si se pasa, Cloudflare lo valida también.
 func (t *TurnstileVerifier) Verify(token, remoteIP string) error {
 	if token == "" {
 		return errors.New("turnstile token is required")
 	}
 
-	form := url.Values{
-		"secret":   {t.secretKey},
-		"response": {token},
-	}
+	form := url.Values{"secret": {t.secretKey}, "response": {token}}
 	if remoteIP != "" {
 		form.Set("remoteip", remoteIP)
 	}
 
-	resp, err := t.httpClient.Post(
-		turnstileVerifyURL,
-		"application/x-www-form-urlencoded",
-		strings.NewReader(form.Encode()),
-	)
+	resp, err := t.httpClient.Post(turnstileVerifyURL, "application/x-www-form-urlencoded", strings.NewReader(form.Encode()))
 	if err != nil {
 		return fmt.Errorf("turnstile request failed: %w", err)
 	}

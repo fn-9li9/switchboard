@@ -22,7 +22,6 @@ func GenerateTOTPSecret(issuer, accountName string) (*otp.Key, string, error) {
 		return nil, "", err
 	}
 
-	// Generar QR como PNG base64
 	img, err := key.Image(256, 256)
 	if err != nil {
 		return nil, "", err
